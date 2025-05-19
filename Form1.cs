@@ -19,6 +19,7 @@ namespace WA_Progetto
         static DataGridViewRow row = null;
         //libreria contenente le query utilizzate
         static LibraryQuery LQ = new LibraryQuery();
+        static LibraryScript LS = new LibraryScript();
 
         public Form1()
         {
@@ -150,60 +151,28 @@ namespace WA_Progetto
         private void btn_Confirm_onClick(object sender, EventArgs e) //metodo creazione file.sql
         {
             bool correct = true;
-            List<string> columnNames = new List<string>();
+            List<string> columnNames = LQ.GetAllColumnNames(Tables_name[0], cnn);
             List<string> values = new List<string>();
             List<string> queriesM = new List<string>();
-            columnNames.Add(dgv_Tabella.Columns[0].HeaderText);
             List<string> s = LQ.GetRequiredColumns(Tables_name[0], cnn);
             s.RemoveAt(0);
             int g = 1;
+            int j = 1;
             //inserimento datatype
             for (int i = 0; i < frm_Querie.Controls.Count; i++) //recupero dati inseriti
             {
-                if (frm_Querie.Controls[i] is Label lbl) //Label
+                if (frm_Querie.Controls[i] is TextBox txt) //TextBox
                 {
-                    if (lbl.Text == "Order")
-                    {
-                        columnNames.Add("[" + lbl.Text + "]");
-                        g++;
-                    }
-                    else
-                    {
-                        columnNames.Add(lbl.Text);
-                        g++;
-                    }
-                }
-
-                else if (frm_Querie.Controls[i] is TextBox txt) //TextBox
-                {
-                    if (txt.Text != "")
-                    {
-                        values.Add("'" + txt.Text + "'");
-                    }
-                    else if (s.Contains(columnNames[columnNames.Count - 1]))
-                    {
-                        correct = false;
-                    }
-                    else
-                    {
-                        columnNames.RemoveAt(columnNames.Count - 1);
-                    }
+                    values.Add(LS.TextBoxScript(txt,dgv_Tabella,s, j).Item1);
+                    correct = LS.TextBoxScript(txt, dgv_Tabella, s, j).Item2;
+                    j++;
                 }
 
                 else if (frm_Querie.Controls[i] is ComboBox cbx) //Combobox
                 {
-                    if (cbx.Text != "")
-                    {
-                        values.Add("'" + cbx.Text + "'");
-                    }
-                    else if (s.Contains(columnNames[columnNames.Count - 1]))
-                    {
-                        correct = false;
-                    }
-                    else
-                    {
-                        columnNames.RemoveAt(columnNames.Count - 1);
-                    }
+                    values.Add(LS.ComboBoxScript(cbx,LQ,cnn,dgv_Tabella,s,j).Item1);
+                    correct = LS.ComboBoxScript(cbx, LQ, cnn, dgv_Tabella, s, j).Item2;
+                    j++;
                 }
                 else if (frm_Querie.Controls[i] is DataGridView dgv) //Datagridview
                 {
@@ -211,41 +180,14 @@ namespace WA_Progetto
                     string columns2 = string.Join(", ", strings);
                     for (int y = 0; y < dgv.Rows.Count - 1; y++)
                     {
-                        string qM = "";
-                        if (dgv.Tag.ToString() == Tables_name[2])
-                        {
-                            qM = $"IF NOT EXISTS\n(SELECT 1 FROM [dbo].[{dgv.Tag.ToString()}] WHERE [Description]='{dgv.Rows[y].Cells[1].Value}') \nBEGIN\n";
-                        }
-                        string parameters2 = "";
-                        for (int k = 0; k < dgv.Rows[y].Cells.Count; k++)
-                        {
-                            if (dgv.Rows[y].Cells[k].Value.ToString() != "")
-                            {
-                                parameters2 += ", '" + dgv.Rows[y].Cells[k].Value + "'";
-                            }
-                            else
-                            {
-                                parameters2 += ", NULL";
-                            }
-
-                        }
-                        qM += $"INSERT INTO [dbo].[{dgv.Tag.ToString()}] ({columns2}) VALUES ((SELECT ISNULL(MAX({strings[0]}), 0) + 1 FROM [dbo].[{dgv.Tag.ToString()}]), @NewIdQueries{parameters2});\n";
-                        if (dgv.Tag.ToString() == Tables_name[2])
-                        {
-                            qM += $"END\n";
-                        }
-                        queriesM.Add(qM);
+                        queriesM.Add(LS.DataGridViewScript(dgv,Tables_name,strings,columns2,y));
                     }
                 }
             }
 
             if (correct) //composizione e creazione file.sql
             {
-                string columns = string.Join(", ", columnNames);
-                string parameters = $"@NewIdQueries" + ", " + string.Join(", ", values);
-                string queriesM1 = string.Join("\n", queriesM);
-                string query = $"DECLARE @NewIdQueries int\n IF NOT EXISTS (\nSELECT 1  FROM [dbo].[{Tables_name[0]}] WHERE [Name]={values[0]}\n) BEGIN\n \tSET @NewIdQueries = (SELECT ISNULL(MAX({columnNames[0]}), 0) + 1 FROM [dbo].[{Tables_name[0]}])\n" +
-                    $" INSERT INTO [dbo].{Tables_name[0]} ({columns}) VALUES ({parameters});\n END\n" + queriesM1;
+                string query = LS.FinalScript(Tables_name,values,columnNames,queriesM);
                 values[0] = values[0].Replace(" ", "_");
                 string name = null;
                 foreach (char c in values[0])
@@ -382,61 +324,15 @@ namespace WA_Progetto
             {
                 if (frm.Controls[i] is TextBox txt)
                 {
-                    if (txt.Text != "")
-                    {
-                        rowt[j] = txt.Text;
-                        j++;
-                    }
-                    else if (s.Contains(dgv.Columns[j].HeaderText))
-                    {
-                        correct = false;
-                    }
-                    else
-                    {
-                        rowt[j] = DBNull.Value;
-                        j++;
-                    }
+                    rowt[j] = LS.TextBoxScript(txt,dgv,s, j).Item1;
+                    correct = LS.TextBoxScript(txt,dgv,s, j).Item2;
+                    j++;
                 }
                 else if (frm.Controls[i] is ComboBox cbx)
                 {
-                    if (cbx.Text != "")
-                    {
-                        if (cbx.Tag != null)
-                        {
-                            string column1 = LQ.GetAllColumnNames(cbx.Tag.ToString(), cnn)[0];
-                            string column2 = LQ.GetAllColumnNames(cbx.Tag.ToString(), cnn)[1];
-                            string query = $"SELECT {column1} FROM {cbx.Tag.ToString()} WHERE {column2} = '{cbx.Text}'";
-                            DataSet ds = LQ.ExecuteQ(query, cnn);
-                            if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
-                            {
-                                if (int.TryParse(ds.Tables[0].Rows[0][0].ToString(), out int idValue))
-                                {
-                                    rowt[j] = idValue;
-                                }
-                                else
-                                {
-                                    correct = false;
-                                }
-                            }
-                            else
-                            {
-                                correct = false;
-                            }
-                        }
-                        else
-                        {
-                            rowt[j] = cbx.Text;
-                        }
-                        j++;
-                    }
-                    else if (s.Contains(dgv.Columns[j].HeaderText))
-                    {
-                        correct = false;
-                    }
-                    else
-                    {
-                        rowt[j] = null;
-                    }
+                    rowt[j] = LS.ComboBoxScript(cbx, LQ,cnn,dgv,s,j).Item1;
+                    correct = LS.ComboBoxScript(cbx, LQ, cnn, dgv, s, j).Item2;
+                    j++;
                 }
             }
             if (correct)
@@ -447,40 +343,6 @@ namespace WA_Progetto
             else
             {
                 MessageBox.Show(string.Join(", ", s) + "are required");
-            }
-        }
-        private bool CanChangeType(string sourceType, Type targetType)
-        {
-            if (string.IsNullOrEmpty(sourceType))
-                return false;
-
-            switch (Type.GetTypeCode(targetType))
-            {
-                case TypeCode.Boolean:
-                    bool b;
-                    return bool.TryParse(sourceType, out b);
-
-                case TypeCode.Int32:
-                    int i32;
-                    return int.TryParse(sourceType, out i32);
-
-                case TypeCode.Single:
-                    float f;
-                    return float.TryParse(sourceType, out f);
-
-                case TypeCode.Double:
-                    double d;
-                    return double.TryParse(sourceType, out d);
-
-                case TypeCode.DateTime:
-                    DateTime dt;
-                    return DateTime.TryParse(sourceType, out dt);
-
-                case TypeCode.String:
-                    return true;
-
-                default:
-                    return false;
             }
         }
     }
