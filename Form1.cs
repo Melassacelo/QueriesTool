@@ -156,21 +156,20 @@ namespace WA_Progetto
             List<string> queriesM = new List<string>();
             List<string> s = LQ.GetRequiredColumns(Tables_name[0], cnn);
             s.RemoveAt(0);
-            int g = 1;
             int j = 1;
             //inserimento datatype
             for (int i = 0; i < frm_Querie.Controls.Count; i++) //recupero dati inseriti
             {
                 if (frm_Querie.Controls[i] is TextBox txt) //TextBox
                 {
-                    values.Add(LS.TextBoxScript(txt,dgv_Tabella,s, j).Item1);
+                    values.Add(LS.TextBoxScript(txt, dgv_Tabella, s, j).Item1);
                     correct = LS.TextBoxScript(txt, dgv_Tabella, s, j).Item2;
                     j++;
                 }
 
                 else if (frm_Querie.Controls[i] is ComboBox cbx) //Combobox
                 {
-                    values.Add(LS.ComboBoxScript(cbx,LQ,cnn,dgv_Tabella,s,j).Item1);
+                    values.Add(LS.ComboBoxScript(cbx, LQ, cnn, dgv_Tabella, s, j).Item1);
                     correct = LS.ComboBoxScript(cbx, LQ, cnn, dgv_Tabella, s, j).Item2;
                     j++;
                 }
@@ -180,14 +179,14 @@ namespace WA_Progetto
                     string columns2 = string.Join(", ", strings);
                     for (int y = 0; y < dgv.Rows.Count - 1; y++)
                     {
-                        queriesM.Add(LS.DataGridViewScript(dgv,Tables_name,strings,columns2,y));
+                        queriesM.Add(LS.DataGridViewScript(dgv, Tables_name, strings, columns2, y));
                     }
                 }
             }
 
             if (correct) //composizione e creazione file.sql
             {
-                string query = LS.FinalScript(Tables_name,values,columnNames,queriesM);
+                string query = LS.FinalScript(Tables_name, values, columnNames, queriesM);
                 values[0] = values[0].Replace(" ", "_");
                 string name = null;
                 foreach (char c in values[0])
@@ -324,13 +323,13 @@ namespace WA_Progetto
             {
                 if (frm.Controls[i] is TextBox txt)
                 {
-                    rowt[j] = LS.TextBoxScript(txt,dgv,s, j).Item1;
-                    correct = LS.TextBoxScript(txt,dgv,s, j).Item2;
+                    rowt[j] = LS.TextBoxScript(txt, dgv, s, j).Item1;
+                    correct = LS.TextBoxScript(txt, dgv, s, j).Item2;
                     j++;
                 }
                 else if (frm.Controls[i] is ComboBox cbx)
                 {
-                    rowt[j] = LS.ComboBoxScript(cbx, LQ,cnn,dgv,s,j).Item1;
+                    rowt[j] = LS.ComboBoxScript(cbx, LQ, cnn, dgv, s, j).Item1;
                     correct = LS.ComboBoxScript(cbx, LQ, cnn, dgv, s, j).Item2;
                     j++;
                 }
@@ -342,7 +341,7 @@ namespace WA_Progetto
             }
             else
             {
-                MessageBox.Show(string.Join(", ", s) + "are required");
+                MessageBox.Show(string.Join(", ", s) + " are required");
             }
         }
     }

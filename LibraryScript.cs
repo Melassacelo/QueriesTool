@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace WA_Progetto
 {
@@ -16,7 +11,7 @@ namespace WA_Progetto
         {
             string columns = string.Join(", ", columnNames);
             string parameters = $"@NewIdQueries";
-            foreach (string v in values) 
+            foreach (string v in values)
             {
                 if (string.IsNullOrEmpty(v))
                 {
@@ -61,7 +56,7 @@ namespace WA_Progetto
         }
 
         public (string, bool) TextBoxScript(TextBox txt, DataGridView dgv, List<string> s, int j)
-        {  
+        {
             string resultString = null;
             bool resultBool = true;
             if (txt.Text != "")
@@ -86,16 +81,9 @@ namespace WA_Progetto
                     string column2 = LQ.GetAllColumnNames(cbx.Tag.ToString(), cnn)[1];
                     string query = $"SELECT {column1} FROM {cbx.Tag.ToString()} WHERE {column2} = '{cbx.Text}'";
                     DataSet ds = LQ.ExecuteQ(query, cnn);
-                    if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+                    if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0 && int.TryParse(ds.Tables[0].Rows[0][0].ToString(), out int idValue))
                     {
-                        if (int.TryParse(ds.Tables[0].Rows[0][0].ToString(), out int idValue))
-                        {
-                            resultString = idValue.ToString();
-                        }
-                        else
-                        {
-                            resultBool = false;
-                        }
+                        resultString = idValue.ToString();
                     }
                     else
                     {
@@ -106,15 +94,10 @@ namespace WA_Progetto
                 {
                     resultString = cbx.Text;
                 }
-                j++;
             }
             else if (s.Contains(dgv.Columns[j].HeaderText))
             {
                 resultBool = false;
-            }
-            else
-            {
-                resultString = null;
             }
             return (resultString, resultBool);
         }
