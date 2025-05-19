@@ -15,8 +15,8 @@ namespace WA_Progetto
         static SqlConnection cnn = new SqlConnection(Connection);
         //Variabili globali
         List<string> Tables_name = new List<string>();
-        static Form frm_Querie = null;
-        static DataGridViewRow row = null;
+        Form frm_Querie = null;
+        DataGridViewRow row = null;
         //libreria contenente le query utilizzate
         static LibraryQuery LQ = new LibraryQuery();
         static LibraryScript LS = new LibraryScript();
@@ -68,6 +68,7 @@ namespace WA_Progetto
             };
 
             int y = 10;
+            List<string> fkColumns = LQ.GetForeignKeyColumns(Tables_name[0], cnn);
             for (int i = 1; i < row.Cells.Count; i++)
             {
                 Label lbl = new Label //Creazione LAbel
@@ -77,36 +78,7 @@ namespace WA_Progetto
                     AutoSize = true
                 };
                 frm_Querie.Controls.Add(lbl);
-                if (row.Cells[i].ValueType == typeof(bool)) //Controllo tipologia dati
-                {
-                    ComboBox cb = new ComboBox //Creazione Combobox
-                    {
-                        DropDownStyle = ComboBoxStyle.DropDownList,
-                        Location = new Point(170, y),
-                        Width = 240
-                    };
-                    cb.Items.Add("True");
-                    cb.Items.Add("False");
-                    if (existing)
-                    {
-                        cb.SelectedIndex = row.Cells[i].Value != null && (bool)row.Cells[i].Value ? 0 : 1;
-                    }
-                    frm_Querie.Controls.Add(cb);
-                }
-                else
-                {
-                    TextBox txt = new TextBox //Creazione TextBox
-                    {
-                        Text = "",
-                        Location = new Point(170, y),
-                        Width = 240,
-                    };
-                    if (existing)
-                    {
-                        txt.Text = row.Cells[i].Value.ToString();
-                    }
-                    frm_Querie.Controls.Add(txt);
-                }
+                frm_Querie.Controls.Add(CreateInputControl(row.Cells[i].ValueType, fkColumns, dgv_Tabella.Columns[i].HeaderText, null, row.Cells[i].Value, y, existing));
 
                 y = y + 30;
             }
@@ -243,52 +215,7 @@ namespace WA_Progetto
                         AutoSize = true
                     };
                     frm_Module.Controls.Add(lbl);
-                    if (fkColumns.Contains(dgv.Columns[i].HeaderText)) //Controllo campi associati a tabelle esterne
-                    {
-
-                        string refInfo = LQ.GetReferencedTable(dgv.Tag.ToString(), dgv.Columns[i].HeaderText, cnn);
-                        string colum = LQ.GetAllColumnNames(refInfo, cnn)[1];
-                        string query = $"SELECT {colum} FROM {refInfo}";
-                        DataSet ds = LQ.ExecuteQ(query, cnn);
-                        ComboBox cb = new ComboBox //Combobox campi esterni
-                        {
-                            DropDownStyle = ComboBoxStyle.DropDownList,
-                            Location = new Point(170, y),
-                            Width = 240,
-                            Tag = refInfo
-                        };
-
-                        foreach (DataRow dr in ds.Tables[0].Rows)
-                        {
-                            cb.Items.Add(dr[0].ToString());
-                        }
-                        frm_Module.Controls.Add(cb);
-                    }
-                    else
-                    {
-                        if (dgv.Rows[0].Cells[i].ValueType == typeof(bool))
-                        {
-                            ComboBox cb = new ComboBox //combobox 
-                            {
-                                DropDownStyle = ComboBoxStyle.DropDownList,
-                                Location = new Point(170, y),
-                                Width = 240
-                            };
-                            cb.Items.Add("True");
-                            cb.Items.Add("False");
-                            frm_Module.Controls.Add(cb);
-                        }
-                        else
-                        {
-                            TextBox txt = new TextBox //textbox
-                            {
-                                Text = "",
-                                Location = new Point(170, y),
-                                Width = 240,
-                            };
-                            frm_Module.Controls.Add(txt);
-                        }
-                    }
+                    frm_Module.Controls.Add(CreateInputControl(dgv.Rows[0].Cells[i].ValueType, fkColumns, dgv.Columns[i].HeaderText, dgv.Tag.ToString(), row.Cells[i].Value,y,false));
                     y = y + 30;
                 }
                 Button btn_ConfirmM = new Button //pulsante conferma
@@ -342,6 +269,64 @@ namespace WA_Progetto
             else
             {
                 MessageBox.Show(string.Join(", ", s) + " are required");
+            }
+        }
+        private Control CreateInputControl(Type valueType, List<string> fkColumns, string Header, string tag,  object value, int y, bool existing)
+        {
+
+            if (fkColumns.Contains(Header)) //Controllo campi associati a tabelle esterne
+            {
+
+                string refInfo = LQ.GetReferencedTable(tag, Header, cnn);
+                string colum = LQ.GetAllColumnNames(refInfo, cnn)[1];
+                string query = $"SELECT {colum} FROM {refInfo}";
+                DataSet ds = LQ.ExecuteQ(query, cnn);
+                ComboBox cb = new ComboBox //Combobox campi esterni
+                {
+                    DropDownStyle = ComboBoxStyle.DropDownList,
+                    Location = new Point(170, y),
+                    Width = 240,
+                    Tag = refInfo
+                };
+
+                foreach (DataRow dr in ds.Tables[0].Rows)
+                {
+                    cb.Items.Add(dr[0].ToString());
+                }
+                return cb;
+            }
+            else
+            {
+                if (valueType == typeof(bool)) //Controllo tipologia dati
+                {
+                    ComboBox cb = new ComboBox //Creazione Combobox
+                    {
+                        DropDownStyle = ComboBoxStyle.DropDownList,
+                        Location = new Point(170, y),
+                        Width = 240
+                    };
+                    cb.Items.Add("True");
+                    cb.Items.Add("False");
+                    if (existing)
+                    {
+                        cb.SelectedIndex = value != null && (bool)value ? 0 : 1;
+                    }
+                    return cb;
+                }
+                else
+                {
+                    TextBox txt = new TextBox //Creazione TextBox
+                    {
+                        Text = "",
+                        Location = new Point(170, y),
+                        Width = 240,
+                    };
+                    if (existing)
+                    {
+                        txt.Text = value.ToString();
+                    }
+                    return txt;
+                }
             }
         }
     }
