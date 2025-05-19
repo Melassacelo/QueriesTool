@@ -15,8 +15,6 @@ namespace WA_Progetto
         static SqlConnection cnn = new SqlConnection(Connection);
         //Variabili globali
         List<string> Tables_name = new List<string>();
-        Form frm_Querie = null;
-        DataGridViewRow row = null;
         //libreria contenente le query utilizzate
         static LibraryQuery LQ = new LibraryQuery();
         static LibraryScript LS = new LibraryScript();
@@ -55,12 +53,12 @@ namespace WA_Progetto
         {
             Button btnCreate = sender as Button;
             bool existing = btnCreate.Text == "Duplicate";
-            row = dgv_Tabella.Rows[0];
+            DataGridViewRow row = dgv_Tabella.Rows[0];
             if (existing)
             {
                 row = dgv_Tabella.Rows[dgv_Tabella.SelectedRows[0].Index];
             }
-            frm_Querie = new Form //Creazione Form
+            Form frm_Querie = new Form //Creazione Form
             {
                 Text = $"Creazione nuovo record",
                 Size = new Size(750, 50 + 30 * row.Cells.Count),
@@ -115,12 +113,12 @@ namespace WA_Progetto
                 Location = new Point(10, frm_Querie.Height - 75),
                 Width = 710,
             };
-            btn_Confirm.Click += btn_Confirm_onClick;
+            btn_Confirm.Click += (s, ev) => btn_Confirm_onClick(s, ev, frm_Querie);
             frm_Querie.Controls.Add(btn_Confirm);
             frm_Querie.ShowDialog(this);
 
         }
-        private void btn_Confirm_onClick(object sender, EventArgs e) //metodo creazione file.sql
+        private void btn_Confirm_onClick(object sender, EventArgs e, Form frm_Querie) //metodo creazione file.sql
         {
             bool correct = true;
             List<string> columnNames = LQ.GetAllColumnNames(Tables_name[0], cnn);
@@ -215,7 +213,7 @@ namespace WA_Progetto
                         AutoSize = true
                     };
                     frm_Module.Controls.Add(lbl);
-                    frm_Module.Controls.Add(CreateInputControl(dgv.Rows[0].Cells[i].ValueType, fkColumns, dgv.Columns[i].HeaderText, dgv.Tag.ToString(), row.Cells[i].Value,y,false));
+                    frm_Module.Controls.Add(CreateInputControl(dgv.Rows[0].Cells[i].ValueType, fkColumns, dgv.Columns[i].HeaderText, dgv.Tag.ToString(), dgv.Rows[0].Cells[i].Value, y,false));
                     y = y + 30;
                 }
                 Button btn_ConfirmM = new Button //pulsante conferma
