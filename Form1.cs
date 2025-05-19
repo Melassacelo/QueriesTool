@@ -11,7 +11,7 @@ namespace WA_Progetto
 {
     public partial class Form1 : Form
     {
-        static string Database_name = "QueriesDb"; //viene utilizata nella stringa di connesione e nella scrittura della query
+        static string Database_name = "QueriesDb2"; //viene utilizata nella stringa di connesione e nella scrittura della query
         static string Connection = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
         static SqlConnection cnn = new SqlConnection(Connection);
         //Variabili globali
