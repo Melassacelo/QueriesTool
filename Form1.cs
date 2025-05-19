@@ -11,7 +11,6 @@ namespace WA_Progetto
 {
     public partial class Form1 : Form
     {
-        static string Database_name = "QueriesDb2"; //viene utilizata nella stringa di connesione e nella scrittura della query
         static string Connection = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
         static SqlConnection cnn = new SqlConnection(Connection);
         //Variabili globali
@@ -117,7 +116,7 @@ namespace WA_Progetto
                 Width = 290,
                 ReadOnly = true,
                 Height = frm_Querie.Height / 2 - 50,
-                DataSource = LQ.ExecuteQ($"SELECT Id_Module, [Order] FROM Queries_CrossModules WHERE ID_Queries = (SELECT ISNULL(MAX(Id_Queries),0) +1 FROM[{Database_name}].[dbo].[{Tables_name[0]}])", cnn).Tables[0]
+                DataSource = LQ.ExecuteQ($"SELECT Id_Module, [Order] FROM Queries_CrossModules WHERE ID_Queries = (SELECT ISNULL(MAX(Id_Queries),0) +1 FROM [dbo].[{Tables_name[0]}])", cnn).Tables[0]
 
             };
             dgv1.DoubleClick += ModuleCreation;
@@ -130,7 +129,7 @@ namespace WA_Progetto
                 Width = 290,
                 ReadOnly = true,
                 Height = frm_Querie.Height / 2 - 50,
-                DataSource = LQ.ExecuteQ($"SELECT Name, Description, Id_Queries_Parameter_Type, [Order], Id_Queries_Parameter_Relation, Active, Mandatory FROM Queries_Parameter WHERE ID_Queries = (SELECT ISNULL(MAX(Id_Queries),0) +1 FROM[{Database_name}].[dbo].[{Tables_name[0]}])", cnn).Tables[0]
+                DataSource = LQ.ExecuteQ($"SELECT Name, Description, Id_Queries_Parameter_Type, [Order], Id_Queries_Parameter_Relation, Active, Mandatory FROM Queries_Parameter WHERE ID_Queries = (SELECT ISNULL(MAX(Id_Queries),0) +1 FROM [dbo].[{Tables_name[0]}])", cnn).Tables[0]
 
             };
             dgv2.DoubleClick += ModuleCreation;
@@ -215,7 +214,7 @@ namespace WA_Progetto
                         string qM = "";
                         if (dgv.Tag.ToString() == Tables_name[2])
                         {
-                            qM = $"IF NOT EXISTS\n(SELECT 1 FROM [{Database_name}].[dbo].[{dgv.Tag.ToString()}] WHERE [Description]='{dgv.Rows[y].Cells[1].Value}') \nBEGIN\n";
+                            qM = $"IF NOT EXISTS\n(SELECT 1 FROM [dbo].[{dgv.Tag.ToString()}] WHERE [Description]='{dgv.Rows[y].Cells[1].Value}') \nBEGIN\n";
                         }
                         string parameters2 = "";
                         for (int k = 0; k < dgv.Rows[y].Cells.Count; k++)
@@ -230,7 +229,7 @@ namespace WA_Progetto
                             }
 
                         }
-                        qM += $"INSERT INTO [{Database_name}].[dbo].[{dgv.Tag.ToString()}] ({columns2}) VALUES ((SELECT ISNULL(MAX({strings[0]}), 0) + 1 FROM [{Database_name}].[dbo].[{dgv.Tag.ToString()}]), @NewIdQueries{parameters2});\n";
+                        qM += $"INSERT INTO [dbo].[{dgv.Tag.ToString()}] ({columns2}) VALUES ((SELECT ISNULL(MAX({strings[0]}), 0) + 1 FROM [dbo].[{dgv.Tag.ToString()}]), @NewIdQueries{parameters2});\n";
                         if (dgv.Tag.ToString() == Tables_name[2])
                         {
                             qM += $"END\n";
@@ -245,8 +244,8 @@ namespace WA_Progetto
                 string columns = string.Join(", ", columnNames);
                 string parameters = $"@NewIdQueries" + ", " + string.Join(", ", values);
                 string queriesM1 = string.Join("\n", queriesM);
-                string query = $"DECLARE @NewIdQueries int\n IF NOT EXISTS (\nSELECT 1  FROM [{Database_name}].[dbo].[{Tables_name[0]}] WHERE [Name]={values[0]}\n) BEGIN\n \tSET @NewIdQueries = (SELECT ISNULL(MAX({columnNames[0]}), 0) + 1 FROM [{Database_name}].[dbo].[{Tables_name[0]}])\n" +
-                    $" INSERT INTO [{Database_name}].[dbo].{Tables_name[0]} ({columns}) VALUES ({parameters});\n END\n" + queriesM1;
+                string query = $"DECLARE @NewIdQueries int\n IF NOT EXISTS (\nSELECT 1  FROM [dbo].[{Tables_name[0]}] WHERE [Name]={values[0]}\n) BEGIN\n \tSET @NewIdQueries = (SELECT ISNULL(MAX({columnNames[0]}), 0) + 1 FROM [dbo].[{Tables_name[0]}])\n" +
+                    $" INSERT INTO [dbo].{Tables_name[0]} ({columns}) VALUES ({parameters});\n END\n" + queriesM1;
                 values[0] = values[0].Replace(" ", "_");
                 string name = null;
                 foreach (char c in values[0])
