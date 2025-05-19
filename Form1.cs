@@ -25,18 +25,15 @@ namespace WA_Progetto
             Tables_name.Add("Queries");
             Tables_name.Add("Queries_CrossModules");
             Tables_name.Add("Queries_Parameter");
-            string query = $"SELECT * FROM {Tables_name[0]}";
-            dgv_Tabella.DataSource = LQ.ExecuteQ(query, cnn).Tables[0];
+            dgv_Tabella.DataSource = LQ.ExecuteQ($"SELECT * FROM {Tables_name[0]}", cnn).Tables[0];
         }
         private void txb_searchBar_TextChanged(object sender, EventArgs e) //barra di ricerca per nome
         {
-            string query = $"SELECT * FROM {Tables_name[0]} WHERE Name LIKE @searchText + '%'";
-            dgv_Tabella.DataSource = LQ.ExecuteQWithParam(query, new SqlParameter("@searchText", txb_searchBar.Text), cnn).Tables[0];
+            dgv_Tabella.DataSource = LQ.ExecuteQWithParam($"SELECT * FROM {Tables_name[0]} WHERE Name LIKE @searchText + '%'", new SqlParameter("@searchText", txb_searchBar.Text), cnn).Tables[0];
         }
         private void txb_SearchId_TextChanged(object sender, EventArgs e) //barra di ricerca per id
         {
-            string query = $"SELECT * FROM {Tables_name[0]} WHERE ID_Queries LIKE @searchId + '%'";
-            dgv_Tabella.DataSource = LQ.ExecuteQWithParam(query, new SqlParameter("@searchId", txb_SearchId.Text), cnn).Tables[0];
+            dgv_Tabella.DataSource = LQ.ExecuteQWithParam($"SELECT * FROM {Tables_name[0]} WHERE ID_Queries LIKE @searchId + '%'", new SqlParameter("@searchId", txb_SearchId.Text), cnn).Tables[0];
         }
         private void dgv_Tabella_SelectionChanged(object sender, EventArgs e) //disattivazione e attivazione pulsante duplicazione
         {
@@ -277,8 +274,7 @@ namespace WA_Progetto
 
                 string refInfo = LQ.GetReferencedTable(tag, Header, cnn);
                 string colum = LQ.GetAllColumnNames(refInfo, cnn)[1];
-                string query = $"SELECT {colum} FROM {refInfo}";
-                DataSet ds = LQ.ExecuteQ(query, cnn);
+                DataSet ds = LQ.ExecuteQ($"SELECT {colum} FROM {refInfo}", cnn);
                 ComboBox cb = new ComboBox //Combobox campi esterni
                 {
                     DropDownStyle = ComboBoxStyle.DropDownList,
