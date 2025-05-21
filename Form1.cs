@@ -125,7 +125,7 @@ namespace WA_Progetto
             s.RemoveAt(0);
             int j = 1;
             //inserimento datatype
-            for (int i = 0; i < frm_Querie.Controls.Count; i++) //recupero dati inseriti
+            for (int i = 0; i < frm_Querie.Controls.Count && correct; i++) //recupero dati inseriti
             {
                 if (frm_Querie.Controls[i] is TextBox txt) //TextBox
                 {
@@ -241,7 +241,7 @@ namespace WA_Progetto
             bool correct = true;
             int j = 0;
             List<string> s = LQ.GetRequiredColumns(dgv.Tag.ToString(), cnn);
-            for (int i = 0; i < frm.Controls.Count; i++)
+            for (int i = 0; i < frm.Controls.Count && correct; i++)
             {
                 if (frm.Controls[i] is TextBox txt)
                 {

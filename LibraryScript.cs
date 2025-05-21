@@ -61,7 +61,14 @@ namespace WA_Progetto
             bool resultBool = true;
             if (txt.Text != "")
             {
-                resultString = txt.Text;
+                if (CorrectValue(txt.Text, dgv.Columns[j].ValueType))
+                {
+                    resultString = txt.Text;
+                }
+                else
+                {
+                    resultBool = false;
+                }
             }
             else if (s.Contains(dgv.Columns[j].HeaderText))
             {
@@ -100,6 +107,37 @@ namespace WA_Progetto
                 resultBool = false;
             }
             return (resultString, resultBool);
+        }
+        private bool CorrectValue(string value, Type type)
+        {
+            if (type == typeof(int))
+            {
+                return int.TryParse(value, out int val);
+            }
+            else if (type == typeof(string))
+            {
+                return true;
+            }
+            else if (type == typeof(double))
+            {
+                return double.TryParse(value, out double val);
+            }
+            else if (type == typeof(decimal))
+            {
+                return decimal.TryParse(value, out decimal val);
+            }
+            else if (type == typeof(DateTime))
+            {
+                return DateTime.TryParse(value, out DateTime val);
+            }
+            else if (type == typeof(bool))
+            {
+                return bool.TryParse(value, out bool val);
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }
