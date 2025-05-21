@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Windows.Forms;
@@ -54,10 +55,9 @@ namespace WA_Progetto
             }
             return qM;
         }
-
-        public (string, bool) TextBoxScript(TextBox txt, DataGridView dgv, List<string> s, int j)
+        public (object, bool) TextBoxScript(TextBox txt, DataGridView dgv, List<string> s, int j)
         {
-            string resultString = null;
+            object resultString = DBNull.Value;
             bool resultBool = true;
             if (txt.Text != "")
             {
@@ -69,9 +69,9 @@ namespace WA_Progetto
             }
             return (resultString, resultBool);
         }
-        public (string, bool) ComboBoxScript(ComboBox cbx, LibraryQuery LQ, SqlConnection cnn, DataGridView dgv, List<string> s, int j)
+        public (object, bool) ComboBoxScript(ComboBox cbx, LibraryQuery LQ, SqlConnection cnn, DataGridView dgv, List<string> s, int j)
         {
-            string resultString = null;
+            object resultString = DBNull.Value;
             bool resultBool = true;
             if (cbx.Text != "")
             {

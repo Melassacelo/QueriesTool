@@ -129,14 +129,14 @@ namespace WA_Progetto
             {
                 if (frm_Querie.Controls[i] is TextBox txt) //TextBox
                 {
-                    values.Add(LS.TextBoxScript(txt, dgv_Tabella, s, j).Item1);
+                    values.Add(LS.TextBoxScript(txt, dgv_Tabella, s, j).Item1.ToString());
                     correct = LS.TextBoxScript(txt, dgv_Tabella, s, j).Item2;
                     j++;
                 }
 
                 else if (frm_Querie.Controls[i] is ComboBox cbx) //Combobox
                 {
-                    values.Add(LS.ComboBoxScript(cbx, LQ, cnn, dgv_Tabella, s, j).Item1);
+                    values.Add(LS.ComboBoxScript(cbx, LQ, cnn, dgv_Tabella, s, j).Item1.ToString());
                     correct = LS.ComboBoxScript(cbx, LQ, cnn, dgv_Tabella, s, j).Item2;
                     j++;
                 }

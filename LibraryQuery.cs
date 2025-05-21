@@ -52,7 +52,6 @@ namespace WA_Progetto
             }
             return ds;
         }
-
         public List<string> GetRequiredColumns(string tableName, SqlConnection cnn)
         {
             List<string> requiredColumns = new List<string>();
