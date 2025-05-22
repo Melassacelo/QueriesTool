@@ -84,9 +84,16 @@ namespace WA_Progetto
                 Width = 290,
                 ReadOnly = true,
                 Height = frm_Querie.Height / 2 - 50,
-                DataSource = LQ.ExecuteQ($"SELECT Id_Module, [Order] FROM Queries_CrossModules WHERE ID_Queries = (SELECT ISNULL(MAX(Id_Queries),0) +1 FROM [dbo].[{Tables_name[0]}])", cnn).Tables[0],
                 Anchor = AnchorStyles.Right | AnchorStyles.Top,
             };
+            if (existing)
+            {
+                dgv1.DataSource = LQ.ExecuteQ($"SELECT Id_Module, [Order] FROM Queries_CrossModules WHERE ID_Queries = {row.Cells[0].Value}", cnn).Tables[0];
+            }
+            else
+            {
+                dgv1.DataSource = LQ.ExecuteQ($"SELECT Id_Module, [Order] FROM Queries_CrossModules WHERE ID_Queries = (SELECT ISNULL(MAX(Id_Queries),0) +1 FROM [dbo].[{Tables_name[0]}])", cnn).Tables[0];
+            }
             dgv1.DoubleClick += ModuleCreation;
             dgv1.KeyDown += (s, ev) => RowElimination(s, ev, dgv1); //Creazione datagridview per tabella Query_parameters
             frm_Querie.Controls.Add(dgv1);
@@ -100,6 +107,14 @@ namespace WA_Progetto
                 DataSource = LQ.ExecuteQ($"SELECT Name, Description, Id_Queries_Parameter_Type, [Order], Id_Queries_Parameter_Relation, Active, Mandatory FROM Queries_Parameter WHERE ID_Queries = (SELECT ISNULL(MAX(Id_Queries),0) +1 FROM [dbo].[{Tables_name[0]}])", cnn).Tables[0],
                 Anchor = AnchorStyles.Right | AnchorStyles.Top,
             };
+            if (existing)
+            {
+                dgv2.DataSource = LQ.ExecuteQ($"SELECT Name, Description, Id_Queries_Parameter_Type, [Order], Id_Queries_Parameter_Relation, Active, Mandatory FROM Queries_Parameter WHERE ID_Queries = {row.Cells[0].Value}", cnn).Tables[0];
+            }
+            else
+            {
+                dgv2.DataSource = LQ.ExecuteQ($"SELECT Name, Description, Id_Queries_Parameter_Type, [Order], Id_Queries_Parameter_Relation, Active, Mandatory FROM Queries_Parameter WHERE ID_Queries = (SELECT ISNULL(MAX(Id_Queries),0) +1 FROM [dbo].[{Tables_name[0]}])", cnn).Tables[0];
+            }
             dgv2.DoubleClick += ModuleCreation;
             dgv2.KeyDown += (s, ev) => RowElimination(s, ev, dgv2);
             frm_Querie.Controls.Add(dgv2);
@@ -192,17 +207,24 @@ namespace WA_Progetto
         private void ModuleCreation(object sender, EventArgs e) //modulo per inserimento Queries_CrossModules e Queries_Parameters
         {
             DataGridView dgv = sender as DataGridView;
+            DataGridViewRow dgvr = dgv.Rows[0];
+            bool existing = false;
+            if (dgv.SelectedRows.Count > 0)
+            {
+                dgvr = dgv.SelectedRows[0];
+                existing = true;
+            }
             if (dgv != null)
             {
                 Form frm_Module = new Form //Form
                 {
                     Text = $"Creazione nuovo record",
-                    Size = new Size(450, 100 + 30 * dgv.Rows[0].Cells.Count),
+                    Size = new Size(450, 100 + 30 * dgvr.Cells.Count),
                     StartPosition = FormStartPosition.CenterParent
                 };
                 int y = 10;
                 List<string> fkColumns = LQ.GetForeignKeyColumns(dgv.Tag.ToString(), cnn);
-                for (int i = 0; i < dgv.Rows[0].Cells.Count; i++)
+                for (int i = 0; i < dgvr.Cells.Count; i++)
                 {
                     Label lbl = new Label //Label
                     {
@@ -211,7 +233,7 @@ namespace WA_Progetto
                         AutoSize = true
                     };
                     frm_Module.Controls.Add(lbl);
-                    frm_Module.Controls.Add(CreateInputControl(dgv.Rows[0].Cells[i].ValueType, fkColumns, dgv.Columns[i].HeaderText, dgv.Tag.ToString(), dgv.Rows[0].Cells[i].Value, y,false));
+                    frm_Module.Controls.Add(CreateInputControl(dgvr.Cells[i].ValueType, fkColumns, dgv.Columns[i].HeaderText, dgv.Tag.ToString(), dgv.Rows[0].Cells[i].Value, y, existing));
                     y = y + 30;
                 }
                 Button btn_ConfirmM = new Button //pulsante conferma
@@ -286,10 +308,17 @@ namespace WA_Progetto
                     Tag = refInfo
 
                 };
-
                 foreach (DataRow dr in ds.Tables[0].Rows)
                 {
                     cb.Items.Add(dr[0].ToString());
+                }
+                if (existing)
+                {
+                    var ds1 = LQ.ExecuteQ($"SELECT {colum} FROM {refInfo} WHERE {Header} = '{value.ToString()}'", cnn);
+                    if (ds1.Tables[0].Rows.Count > 0)
+                    {
+                        cb.SelectedItem = ds1.Tables[0].Rows[0][0].ToString();
+                    }
                 }
                 return cb;
             }
