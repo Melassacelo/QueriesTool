@@ -73,7 +73,7 @@ namespace WA_Progetto
                     Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Top,
                 };
                 frm_Querie.Controls.Add(lbl);
-                frm_Querie.Controls.Add(CreateInputControl(row.Cells[i].ValueType, fkColumns, dgv_Tabella.Columns[i].HeaderText, null, row.Cells[i].Value, y, existing));
+                frm_Querie.Controls.Add(CreateInputControl(row.Cells[i].ValueType, fkColumns, dgv_Tabella.Columns[i].HeaderText, Tables_name[0], row.Cells[i].Value, y, existing));
 
                 y = y + 30;
             }
@@ -270,7 +270,7 @@ namespace WA_Progetto
         private Control CreateInputControl(Type valueType, List<string> fkColumns, string Header, string tag,  object value, int y, bool existing)
         {
 
-            if (fkColumns.Contains(Header)) //Controllo campi associati a tabelle esterne
+            if (fkColumns.Contains(Header) && !string.IsNullOrEmpty(tag)) //Controllo campi associati a tabelle esterne
             {
 
                 string refInfo = LQ.GetReferencedTable(tag, Header, cnn);
