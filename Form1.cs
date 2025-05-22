@@ -261,6 +261,7 @@ namespace WA_Progetto
             {
                 dt.Rows.Add(rowt);
                 dgv.DataSource = dt;
+                frm.Close();
             }
             else
             {
