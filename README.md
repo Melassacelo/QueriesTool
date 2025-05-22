@@ -5,11 +5,17 @@ The main project files are `Form1.cs`, `LibraryQuery.cs`, and `LibraryScript.cs`
 ## Table of Contents
 * [General Info](#general-info)
 * [Main Components](#main-components)
-* [Main Features](#main-features)
 * [Requirements](#requirements)
+* [Screenshots](#screenshots)
 
 ---
 ## General Info
+This project is a Windows Forms application developed in C# (.NET Framework 4.7.2) that provides a graphical interface for managing and generating SQL scripts related to database queries and their associated modules and parameters. The application connects to a SQL Server database using a configurable connection string and allows users to:
+- View, search, and filter records in the main "Queries" table by name or ID.
+- Create new query records or duplicate existing ones through a dynamic form that adapts to the table schema.
+- Manage related records in the "Queries_CrossModules" and "Queries_Parameter" tables using embedded DataGridViews.
+- Automatically generate SQL script files based on the data entered, ensuring required fields are validated and foreign key relationships are respected.
+- Interact with the database schema dynamically, retrieving column names, required fields, and foreign key information at runtime.
 
 ---
 ## Main Components
@@ -34,20 +40,17 @@ The main project files are `Form1.cs`, `LibraryQuery.cs`, and `LibraryScript.cs`
 
 ---
 
-## Main Features
-
-- **Search by Name or ID**: Filters displayed records using search TextBoxes.
-- **Create/Duplicate Records**: Allows creation of new records or duplication of existing ones through dynamic forms.
-- **Parameter and Module Management**: Add, edit, or remove parameters and modules associated with a query.
-- **Automatic Validation**: Ensures entered data matches the expected SQL column data type.
-- **SQL Script Export**: Saves the generated SQL insert script to a file.
-
----
-
 ## Requirements
 
 - .NET Framework 4.7.2
 - SQL Server (as backend database)
 - Visual Studio 2022
+
+---
+
+## Screenshots
+<img src="https://github.com/user-attachments/assets/d78d8d83-e34e-438a-a5c7-5b5ea7d7d747" height="225">
+<img src="https://github.com/user-attachments/assets/9b5a2a07-397d-4087-8a93-ee24a66cd460" height="225">
+<img src="https://github.com/user-attachments/assets/baeae23c-adf3-4d3b-a48e-b4fb8e44557f" height="225">
 
 ---
