@@ -44,6 +44,9 @@
             this.dgv_Tabella.AllowUserToDeleteRows = false;
             this.dgv_Tabella.AllowUserToResizeColumns = false;
             this.dgv_Tabella.AllowUserToResizeRows = false;
+            this.dgv_Tabella.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.dgv_Tabella.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgv_Tabella.Location = new System.Drawing.Point(14, 91);
             this.dgv_Tabella.Name = "dgv_Tabella";
@@ -90,6 +93,7 @@
             // 
             // btn_Add
             // 
+            this.btn_Add.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btn_Add.Location = new System.Drawing.Point(1071, 13);
             this.btn_Add.Name = "btn_Add";
             this.btn_Add.Size = new System.Drawing.Size(101, 59);
@@ -100,6 +104,7 @@
             // 
             // btn_Duplicate
             // 
+            this.btn_Duplicate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btn_Duplicate.Enabled = false;
             this.btn_Duplicate.Location = new System.Drawing.Point(964, 13);
             this.btn_Duplicate.Name = "btn_Duplicate";

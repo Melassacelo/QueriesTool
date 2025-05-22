@@ -61,7 +61,6 @@ namespace WA_Progetto
                 Size = new Size(750, 50 + 30 * row.Cells.Count),
                 StartPosition = FormStartPosition.CenterParent
             };
-
             int y = 10;
             List<string> fkColumns = LQ.GetForeignKeyColumns(Tables_name[0], cnn);
             for (int i = 1; i < row.Cells.Count; i++)
@@ -70,7 +69,8 @@ namespace WA_Progetto
                 {
                     Text = dgv_Tabella.Columns[i].HeaderText,
                     Location = new Point(10, y + 3),
-                    AutoSize = true
+                    AutoSize = true,
+                    Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Top,
                 };
                 frm_Querie.Controls.Add(lbl);
                 frm_Querie.Controls.Add(CreateInputControl(row.Cells[i].ValueType, fkColumns, dgv_Tabella.Columns[i].HeaderText, null, row.Cells[i].Value, y, existing));
@@ -84,8 +84,8 @@ namespace WA_Progetto
                 Width = 290,
                 ReadOnly = true,
                 Height = frm_Querie.Height / 2 - 50,
-                DataSource = LQ.ExecuteQ($"SELECT Id_Module, [Order] FROM Queries_CrossModules WHERE ID_Queries = (SELECT ISNULL(MAX(Id_Queries),0) +1 FROM [dbo].[{Tables_name[0]}])", cnn).Tables[0]
-
+                DataSource = LQ.ExecuteQ($"SELECT Id_Module, [Order] FROM Queries_CrossModules WHERE ID_Queries = (SELECT ISNULL(MAX(Id_Queries),0) +1 FROM [dbo].[{Tables_name[0]}])", cnn).Tables[0],
+                Anchor = AnchorStyles.Right | AnchorStyles.Top,
             };
             dgv1.DoubleClick += ModuleCreation;
             dgv1.KeyDown += (s, ev) => RowElimination(s, ev, dgv1); //Creazione datagridview per tabella Query_parameters
@@ -97,8 +97,8 @@ namespace WA_Progetto
                 Width = 290,
                 ReadOnly = true,
                 Height = frm_Querie.Height / 2 - 50,
-                DataSource = LQ.ExecuteQ($"SELECT Name, Description, Id_Queries_Parameter_Type, [Order], Id_Queries_Parameter_Relation, Active, Mandatory FROM Queries_Parameter WHERE ID_Queries = (SELECT ISNULL(MAX(Id_Queries),0) +1 FROM [dbo].[{Tables_name[0]}])", cnn).Tables[0]
-
+                DataSource = LQ.ExecuteQ($"SELECT Name, Description, Id_Queries_Parameter_Type, [Order], Id_Queries_Parameter_Relation, Active, Mandatory FROM Queries_Parameter WHERE ID_Queries = (SELECT ISNULL(MAX(Id_Queries),0) +1 FROM [dbo].[{Tables_name[0]}])", cnn).Tables[0],
+                Anchor = AnchorStyles.Right | AnchorStyles.Top,
             };
             dgv2.DoubleClick += ModuleCreation;
             dgv2.KeyDown += (s, ev) => RowElimination(s, ev, dgv2);
@@ -109,6 +109,7 @@ namespace WA_Progetto
                 Text = "Confirm",
                 Location = new Point(10, frm_Querie.Height - 75),
                 Width = 710,
+                Anchor = AnchorStyles.Right | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Top,
             };
             btn_Confirm.Click += (s, ev) => btn_Confirm_onClick(s, ev, frm_Querie);
             frm_Querie.Controls.Add(btn_Confirm);
@@ -280,7 +281,9 @@ namespace WA_Progetto
                     DropDownStyle = ComboBoxStyle.DropDownList,
                     Location = new Point(170, y),
                     Width = 240,
+                    Anchor = AnchorStyles.Right | AnchorStyles.Left | AnchorStyles.Top,
                     Tag = refInfo
+
                 };
 
                 foreach (DataRow dr in ds.Tables[0].Rows)
@@ -297,6 +300,7 @@ namespace WA_Progetto
                     {
                         DropDownStyle = ComboBoxStyle.DropDownList,
                         Location = new Point(170, y),
+                        Anchor = AnchorStyles.Right | AnchorStyles.Left | AnchorStyles.Top,
                         Width = 240
                     };
                     cb.Items.Add("True");
@@ -313,6 +317,7 @@ namespace WA_Progetto
                     {
                         Text = "",
                         Location = new Point(170, y),
+                        Anchor = AnchorStyles.Right | AnchorStyles.Left | AnchorStyles.Top,
                         Width = 240,
                     };
                     if (existing)
