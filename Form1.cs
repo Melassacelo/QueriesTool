@@ -121,7 +121,7 @@ namespace WA_Progetto
 
             Button btn_Confirm = new Button //pulsante per la creazione del file.sql
             {
-                Text = "Confirm",
+                Text = "Generate .sql script",
                 Location = new Point(10, frm_Querie.Height - 75),
                 Width = 710,
                 Anchor = AnchorStyles.Right | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Top,
@@ -182,12 +182,22 @@ namespace WA_Progetto
 
                 try
                 {
-                    using (StreamWriter sw = new StreamWriter(name + ".SQL"))
+                    using (SaveFileDialog saveFileDialog = new SaveFileDialog())
                     {
-                        sw.WriteLine(query);
+                        saveFileDialog.Filter = "SQL files (*.sql)|*.sql|All files (*.*)|*.*";
+                        saveFileDialog.FileName = name + ".sql";
+                        saveFileDialog.Title = "Scegli dove salvare il file SQL";
+
+                        if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                        {
+                            using (StreamWriter sw = new StreamWriter(saveFileDialog.FileName))
+                            {
+                                sw.WriteLine(query);
+                            }
+                            MessageBox.Show("SQL creata con successo");
+                            frm_Querie.Close();
+                        }
                     }
-                    MessageBox.Show("SQL creata con successo");
-                    frm_Querie.Close();
                 }
                 catch (Exception ex)
                 {
