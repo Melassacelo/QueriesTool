@@ -24,7 +24,7 @@ namespace WA_Progetto
                 }
             }
             string queriesM1 = string.Join("\n", queriesM);
-            string query = $"DECLARE @NewIdQueries int\n IF NOT EXISTS (\nSELECT 1  FROM [dbo].[{Tables_name[0]}] WHERE [Name]='{values[0]}'\n) BEGIN\n \tSET @NewIdQueries = (SELECT ISNULL(MAX({columnNames[0]}), 0) + 1 FROM [dbo].[{Tables_name[0]}])\n" +
+            string query = $"DECLARE @NewIdQueries int\n DECLARE @NewIdQueriesParameter int\n IF NOT EXISTS (\nSELECT 1  FROM [dbo].[{Tables_name[0]}] WHERE [Name]='{values[0]}'\n) BEGIN\n \tSET @NewIdQueries = (SELECT ISNULL(MAX({columnNames[0]}), 0) + 1 FROM [dbo].[{Tables_name[0]}])\n" +
                 $" INSERT INTO [dbo].{Tables_name[0]} ({columns}) VALUES ({parameters});\n END\n" + queriesM1;
             return query;
         }
@@ -33,10 +33,10 @@ namespace WA_Progetto
             string qM = "";
             if (dgv.Tag.ToString() == Tables_name[2])
             {
-                qM = $"IF NOT EXISTS\n(SELECT 1 FROM [dbo].[{dgv.Tag.ToString()}] WHERE [Description]='{dgv.Rows[y].Cells[1].Value}') \nBEGIN\n";
+                qM = $"IF NOT EXISTS\n(SELECT 1 FROM [dbo].[{dgv.Tag.ToString()}] WHERE [Description]='{dgv.Rows[y].Cells[3].Value}') \nBEGIN\nSET @NewIdQueriesParameter = (SELECT ISNULL(MAX({strings[0]}), 0) + 1 FROM [dbo].[{dgv.Tag.ToString()}])\n";
             }
             string parameters2 = "";
-            for (int k = 0; k < dgv.Rows[y].Cells.Count; k++)
+            for (int k = 2; k < dgv.Rows[y].Cells.Count; k++)
             {
                 if (dgv.Rows[y].Cells[k].Value.ToString() != "")
                 {
@@ -48,7 +48,18 @@ namespace WA_Progetto
                 }
 
             }
-            qM += $"INSERT INTO [dbo].[{dgv.Tag.ToString()}] ({columns2}) VALUES ((SELECT ISNULL(MAX({strings[0]}), 0) + 1 FROM [dbo].[{dgv.Tag.ToString()}]), @NewIdQueries{parameters2});\n";
+            if (dgv.Tag.ToString() == Tables_name[3])
+            {
+                qM += $"INSERT INTO [dbo].[{dgv.Tag.ToString()}] ({columns2}) VALUES ((SELECT ISNULL(MAX({strings[0]}), 0) + 1 FROM [dbo].[{dgv.Tag.ToString()}]), @NewIdQueriesParameter{parameters2});\n";
+            }else if (dgv.Tag.ToString() == Tables_name[2])
+            {
+                qM += $"INSERT INTO [dbo].[{dgv.Tag.ToString()}] ({columns2}) VALUES (@NewIdQueriesParameter, @NewIdQueries{parameters2});\n";
+            }
+            else
+            {
+                qM += $"INSERT INTO [dbo].[{dgv.Tag.ToString()}] ({columns2}) VALUES ((SELECT ISNULL(MAX({strings[0]}), 0) + 1 FROM [dbo].[{dgv.Tag.ToString()}]), @NewIdQueries{parameters2});\n";
+            }
+
             if (dgv.Tag.ToString() == Tables_name[2])
             {
                 qM += $"END\n";
@@ -76,7 +87,7 @@ namespace WA_Progetto
             }
             return (resultString, resultBool);
         }
-        public (object, bool) ComboBoxScript(ComboBox cbx, LibraryQuery LQ, SqlConnection cnn, DataGridView dgv, List<string> s, int j)
+        public (object, bool) ComboBoxScript(ComboBox cbx, LibraryQuery LQ, SqlConnection cnn, DataGridView dgv, List<string> s, int j, List<string> Tables_Name, DataTable dt=null)
         {
             object resultString = DBNull.Value;
             bool resultBool = true;
@@ -84,17 +95,30 @@ namespace WA_Progetto
             {
                 if (cbx.Tag != null)
                 {
-                    string column1 = LQ.GetAllColumnNames(cbx.Tag.ToString(), cnn)[0];
-                    string column2 = LQ.GetAllColumnNames(cbx.Tag.ToString(), cnn)[1];
-                    string query = $"SELECT {column1} FROM {cbx.Tag.ToString()} WHERE {column2} = '{cbx.Text}'";
-                    DataSet ds = LQ.ExecuteQ(query, cnn);
-                    if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0 && int.TryParse(ds.Tables[0].Rows[0][0].ToString(), out int idValue))
+                    if (!Tables_Name.Contains(cbx.Tag.ToString()))
                     {
-                        resultString = idValue.ToString();
+                        string column1 = LQ.GetAllColumnNames(cbx.Tag.ToString(), cnn)[0];
+                        string column2 = LQ.GetAllColumnNames(cbx.Tag.ToString(), cnn)[1];
+                        string query = $"SELECT {column1} FROM {cbx.Tag.ToString()} WHERE {column2} = '{cbx.Text}'";
+                        DataSet ds = LQ.ExecuteQ(query, cnn);
+                        if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0 && int.TryParse(ds.Tables[0].Rows[0][0].ToString(), out int idValue))
+                        {
+                            resultString = idValue.ToString();
+                        }
+                        else
+                        {
+                            resultBool = false;
+                        }
                     }
                     else
                     {
-                        resultBool = false;
+                        foreach (DataRow dr in dt.Rows) 
+                        {
+                            if (dr[2].ToString()==cbx.Text)
+                            {
+                                resultString = dr[0].ToString();
+                            }
+                        }
                     }
                 }
                 else

@@ -15,6 +15,7 @@ namespace WA_Progetto
         static SqlConnection cnn = new SqlConnection(Connection);
         //Variabili globali
         List<string> Tables_name = new List<string>();
+        int a = 1;
         //libreria contenente le query utilizzate
         static LibraryQuery LQ = new LibraryQuery();
         static LibraryScript LS = new LibraryScript();
@@ -25,6 +26,7 @@ namespace WA_Progetto
             Tables_name.Add("Queries");
             Tables_name.Add("Queries_CrossModules");
             Tables_name.Add("Queries_Parameter");
+            Tables_name.Add("Queries_Parameter_Detail");
             dgv_Tabella.DataSource = LQ.ExecuteQ($"SELECT * FROM {Tables_name[0]}", cnn).Tables[0];
         }
         private void txb_searchBar_TextChanged(object sender, EventArgs e) //barra di ricerca per nome
@@ -58,7 +60,7 @@ namespace WA_Progetto
             Form frm_Querie = new Form //Creazione Form
             {
                 Text = $"Creazione nuovo record",
-                Size = new Size(750, 50 + 30 * row.Cells.Count),
+                Size = new Size(1050, 50 + 30 * row.Cells.Count),
                 StartPosition = FormStartPosition.CenterParent
             };
             int y = 10;
@@ -88,13 +90,13 @@ namespace WA_Progetto
             };
             if (existing)
             {
-                dgv1.DataSource = LQ.ExecuteQ($"SELECT Id_Module, [Order] FROM Queries_CrossModules WHERE ID_Queries = {row.Cells[0].Value}", cnn).Tables[0];
+                dgv1.DataSource = LQ.ExecuteQ($"SELECT * FROM Queries_CrossModules WHERE ID_Queries = {row.Cells[0].Value}", cnn).Tables[0];
             }
             else
             {
-                dgv1.DataSource = LQ.ExecuteQ($"SELECT Id_Module, [Order] FROM Queries_CrossModules WHERE ID_Queries = (SELECT ISNULL(MAX(Id_Queries),0) +1 FROM [dbo].[{Tables_name[0]}])", cnn).Tables[0];
+                dgv1.DataSource = LQ.ExecuteQ($"SELECT * FROM Queries_CrossModules WHERE ID_Queries = (SELECT ISNULL(MAX(Id_Queries),0) +1 FROM [dbo].[{Tables_name[0]}])", cnn).Tables[0];
             }
-            dgv1.DoubleClick += ModuleCreation;
+            dgv1.DoubleClick += (s, ev) => ModuleCreation(s, ev);
             dgv1.KeyDown += (s, ev) => RowElimination(s, ev, dgv1); //Creazione datagridview per tabella Query_parameters
             frm_Querie.Controls.Add(dgv1);
             DataGridView dgv2 = new DataGridView
@@ -104,30 +106,60 @@ namespace WA_Progetto
                 Width = 290,
                 ReadOnly = true,
                 Height = frm_Querie.Height / 2 - 50,
-                DataSource = LQ.ExecuteQ($"SELECT Name, Description, Id_Queries_Parameter_Type, [Order], Id_Queries_Parameter_Relation, Active, Mandatory FROM Queries_Parameter WHERE ID_Queries = (SELECT ISNULL(MAX(Id_Queries),0) +1 FROM [dbo].[{Tables_name[0]}])", cnn).Tables[0],
+                DataSource = LQ.ExecuteQ($"SELECT * FROM Queries_Parameter WHERE ID_Queries = (SELECT ISNULL(MAX(Id_Queries),0) +1 FROM [dbo].[{Tables_name[0]}])", cnn).Tables[0],
                 Anchor = AnchorStyles.Right | AnchorStyles.Top,
             };
             if (existing)
             {
-                dgv2.DataSource = LQ.ExecuteQ($"SELECT Name, Description, Id_Queries_Parameter_Type, [Order], Id_Queries_Parameter_Relation, Active, Mandatory FROM Queries_Parameter WHERE ID_Queries = {row.Cells[0].Value}", cnn).Tables[0];
+                dgv2.DataSource = LQ.ExecuteQ($"SELECT * FROM Queries_Parameter WHERE ID_Queries = {row.Cells[0].Value}", cnn).Tables[0];
             }
             else
             {
-                dgv2.DataSource = LQ.ExecuteQ($"SELECT Name, Description, Id_Queries_Parameter_Type, [Order], Id_Queries_Parameter_Relation, Active, Mandatory FROM Queries_Parameter WHERE ID_Queries = (SELECT ISNULL(MAX(Id_Queries),0) +1 FROM [dbo].[{Tables_name[0]}])", cnn).Tables[0];
+                dgv2.DataSource = LQ.ExecuteQ($"SELECT * FROM Queries_Parameter WHERE ID_Queries = (SELECT ISNULL(MAX(Id_Queries),0) +1 FROM [dbo].[{Tables_name[0]}])", cnn).Tables[0];
             }
-            dgv2.DoubleClick += ModuleCreation;
+            dgv2.DoubleClick += (s, ev) => ModuleCreation(s, ev);
             dgv2.KeyDown += (s, ev) => RowElimination(s, ev, dgv2);
             frm_Querie.Controls.Add(dgv2);
 
+            DataGridView dgv3 = new DataGridView
+            {
+                Tag = "Queries_Parameter_Detail",
+                Location = new Point(730, 10),
+                Width = 290,
+                ReadOnly = true,
+                Height = frm_Querie.Height - 90,
+                DataSource = LQ.ExecuteQ($"SELECT * FROM Queries_Parameter_Detail WHERE ID_Queries_Parameter = (SELECT ISNULL(MAX(ID_Queries_Parameter),0) +1 FROM [dbo].[{Tables_name[2]}])", cnn).Tables[0],
+                Anchor = AnchorStyles.Right | AnchorStyles.Top,
+            };
+            if (existing)
+            {
+                DataTable dt = new DataTable();
+                DataTable dt2 = dgv2.DataSource as DataTable;
+                foreach (DataRow drv in dt2.Rows)
+                {
+                    DataTable dt1 = LQ.ExecuteQ($"SELECT * FROM Queries_Parameter_Detail WHERE ID_Queries_Parameter = {drv[0]}", cnn).Tables[0];
+                    dt.Merge(dt1);
+                }
+                dgv3.DataSource = dt;
+            }
+            else
+            {
+                dgv3.DataSource = LQ.ExecuteQ($"SELECT * FROM Queries_Parameter_Detail WHERE ID_Queries_Parameter = (SELECT ISNULL(MAX(ID_Queries_Parameter),0) +1 FROM [dbo].[{Tables_name[2]}])", cnn).Tables[0];
+            }
+            dgv3.DoubleClick += (s, ev) => ModuleCreation(s,ev, dgv2.DataSource as DataTable);
+            dgv3.KeyDown += (s, ev) => RowElimination(s, ev, dgv3);
+            frm_Querie.Controls.Add(dgv3);
+            dgv2.SelectionChanged += (s, ev) => SelectionDetail(s, ev, dgv3);
             Button btn_Confirm = new Button //pulsante per la creazione del file.sql
             {
                 Text = "Generate .sql script",
                 Location = new Point(10, frm_Querie.Height - 75),
-                Width = 710,
+                Width = 1010,
                 Anchor = AnchorStyles.Right | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Top,
             };
             btn_Confirm.Click += (s, ev) => btn_Confirm_onClick(s, ev, frm_Querie);
             frm_Querie.Controls.Add(btn_Confirm);
+            frm_Querie.Load += FormLoad;
             frm_Querie.ShowDialog(this);
 
         }
@@ -152,17 +184,32 @@ namespace WA_Progetto
 
                 else if (frm_Querie.Controls[i] is ComboBox cbx) //Combobox
                 {
-                    values.Add(LS.ComboBoxScript(cbx, LQ, cnn, dgv_Tabella, s, j).Item1.ToString());
-                    correct = LS.ComboBoxScript(cbx, LQ, cnn, dgv_Tabella, s, j).Item2;
+                    values.Add(LS.ComboBoxScript(cbx, LQ, cnn, dgv_Tabella, s, j, Tables_name).Item1.ToString());
+                    correct = LS.ComboBoxScript(cbx, LQ, cnn, dgv_Tabella, s, j, Tables_name).Item2;
                     j++;
                 }
                 else if (frm_Querie.Controls[i] is DataGridView dgv) //Datagridview
                 {
+                    DataTable dt = dgv.DataSource as DataTable;
+                    dt.DefaultView.RowFilter = "";
                     List<string> strings = LQ.GetAllColumnNames(dgv.Tag.ToString(), cnn);
                     string columns2 = string.Join(", ", strings);
-                    for (int y = 0; y < dgv.Rows.Count - 1; y++)
+                    if (dgv.Tag.ToString() != Tables_name[3])
                     {
-                        queriesM.Add(LS.DataGridViewScript(dgv, Tables_name, strings, columns2, y));
+                        for (int y = 0; y < dgv.Rows.Count - 1; y++)
+                        {
+                            queriesM.Add(LS.DataGridViewScript(dgv, Tables_name, strings, columns2, y));
+                            if (dgv.Tag.ToString() == Tables_name[2])
+                            {
+                                DataGridView dgv1 = frm_Querie.Controls[i+1] as DataGridView;
+                                DataTable dt1 = dgv1.DataSource as DataTable;
+                                dt1.DefaultView.RowFilter = $"{dgv1.Columns[1].HeaderText} = '{dgv.Rows[y].Cells[0].Value}'";
+                                for (int x = 0; x < dgv1.Rows.Count -1; x++)
+                                {
+                                    queriesM.Add(LS.DataGridViewScript(dgv1, Tables_name, LQ.GetAllColumnNames(dgv1.Tag.ToString(), cnn), string.Join(", ", LQ.GetAllColumnNames(dgv1.Tag.ToString(), cnn)), x));
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -214,7 +261,7 @@ namespace WA_Progetto
 
         }
 
-        private void ModuleCreation(object sender, EventArgs e) //modulo per inserimento Queries_CrossModules e Queries_Parameters
+        private void ModuleCreation(object sender, EventArgs e, DataTable dt = null) //modulo per inserimento Queries_CrossModules e Queries_Parameters
         {
             DataGridView dgv = sender as DataGridView;
             DataGridViewRow dgvr = dgv.Rows[0];
@@ -229,12 +276,17 @@ namespace WA_Progetto
                 Form frm_Module = new Form //Form
                 {
                     Text = $"Creazione nuovo record",
-                    Size = new Size(450, 100 + 30 * dgvr.Cells.Count),
+                    Size = new Size(450, 100 + 30 * (dgvr.Cells.Count)),
                     StartPosition = FormStartPosition.CenterParent
                 };
                 int y = 10;
                 List<string> fkColumns = LQ.GetForeignKeyColumns(dgv.Tag.ToString(), cnn);
-                for (int i = 0; i < dgvr.Cells.Count; i++)
+                int n = 2;
+                if (dgv.Tag.ToString() == Tables_name[3])
+                {
+                    n = 1;
+                }
+                for (int i = n; i < dgvr.Cells.Count; i++)
                 {
                     Label lbl = new Label //Label
                     {
@@ -243,7 +295,7 @@ namespace WA_Progetto
                         AutoSize = true
                     };
                     frm_Module.Controls.Add(lbl);
-                    frm_Module.Controls.Add(CreateInputControl(dgvr.Cells[i].ValueType, fkColumns, dgv.Columns[i].HeaderText, dgv.Tag.ToString(), dgv.Rows[0].Cells[i].Value, y, existing));
+                    frm_Module.Controls.Add(CreateInputControl(dgvr.Cells[i].ValueType, fkColumns, dgv.Columns[i].HeaderText, dgv.Tag.ToString(), dgv.Rows[0].Cells[i].Value, y, existing,dt));
                     y = y + 30;
                 }
                 Button btn_ConfirmM = new Button //pulsante conferma
@@ -252,7 +304,7 @@ namespace WA_Progetto
                     Location = new Point(10, frm_Module.Height - 75),
                     Width = 410,
                 };
-                btn_ConfirmM.Click += (s, ev) => btn_ConfirmM_onClick(s, ev, frm_Module, dgv);
+                btn_ConfirmM.Click += (s, ev) => btn_ConfirmM_onClick(s, ev, frm_Module, dgv, dt);
                 frm_Module.Controls.Add(btn_ConfirmM);
                 frm_Module.ShowDialog();
             }
@@ -264,15 +316,23 @@ namespace WA_Progetto
                 DataTable dt = dgv.DataSource as DataTable;
                 dt.Rows.RemoveAt(dgv.SelectedRows[0].Index);
                 dgv.DataSource = dt;
+                if (dgv.Tag.ToString() == Tables_name[2])
+                {
+                    a--;
+                }
             }
         }
 
-        private void btn_ConfirmM_onClick(object sender, EventArgs e, Form frm, DataGridView dgv) //conferma inserimento querie associata
+        private void btn_ConfirmM_onClick(object sender, EventArgs e, Form frm, DataGridView dgv, DataTable dt1) //conferma inserimento querie associata
         {
             DataTable dt = dgv.DataSource as DataTable;
             DataRow rowt = dt.NewRow();
             bool correct = true;
-            int j = 0;
+            int j = 2;
+            if (dgv.Tag.ToString() == Tables_name[3])
+            {
+                j = 1;
+            }
             List<string> s = LQ.GetRequiredColumns(dgv.Tag.ToString(), cnn);
             for (int i = 0; i < frm.Controls.Count && correct; i++)
             {
@@ -284,13 +344,23 @@ namespace WA_Progetto
                 }
                 else if (frm.Controls[i] is ComboBox cbx)
                 {
-                    rowt[j] = LS.ComboBoxScript(cbx, LQ, cnn, dgv, s, j).Item1;
-                    correct = LS.ComboBoxScript(cbx, LQ, cnn, dgv, s, j).Item2;
+                    rowt[j] = LS.ComboBoxScript(cbx, LQ, cnn, dgv, s, j, Tables_name, dt1).Item1;
+                    correct = LS.ComboBoxScript(cbx, LQ, cnn, dgv, s, j, Tables_name, dt1).Item2;
                     j++;
                 }
             }
             if (correct)
             {
+                if (dgv.SelectedRows.Count>0)
+                {
+                    dt.Rows.RemoveAt(dgv.SelectedRows[0].Index);
+                }
+                if (dgv.Tag.ToString() == Tables_name[2])
+                {
+
+                    rowt[0] = Convert.ToInt32(LQ.ExecuteQ($"SELECT ISNULL(MAX(Id_Queries_Parameter), 0) + {a} FROM [dbo].[{dgv.Tag.ToString()}]", cnn).Tables[0].Rows[0][0]);
+                    a++;
+                }
                 dt.Rows.Add(rowt);
                 dgv.DataSource = dt;
                 frm.Close();
@@ -300,15 +370,12 @@ namespace WA_Progetto
                 MessageBox.Show(string.Join(", ", s) + " are required");
             }
         }
-        private Control CreateInputControl(Type valueType, List<string> fkColumns, string Header, string tag,  object value, int y, bool existing)
+        private Control CreateInputControl(Type valueType, List<string> fkColumns, string Header, string tag,  object value, int y, bool existing, DataTable dt=null)
         {
 
             if (fkColumns.Contains(Header) && !string.IsNullOrEmpty(tag)) //Controllo campi associati a tabelle esterne
             {
-
                 string refInfo = LQ.GetReferencedTable(tag, Header, cnn);
-                string colum = LQ.GetAllColumnNames(refInfo, cnn)[1];
-                DataSet ds = LQ.ExecuteQ($"SELECT {colum} FROM {refInfo}", cnn);
                 ComboBox cb = new ComboBox //Combobox campi esterni
                 {
                     DropDownStyle = ComboBoxStyle.DropDownList,
@@ -318,16 +385,28 @@ namespace WA_Progetto
                     Tag = refInfo
 
                 };
-                foreach (DataRow dr in ds.Tables[0].Rows)
+                if (Tables_name.Contains(refInfo) && dt !=null)
                 {
-                    cb.Items.Add(dr[0].ToString());
-                }
-                if (existing)
-                {
-                    var ds1 = LQ.ExecuteQ($"SELECT {colum} FROM {refInfo} WHERE {Header} = '{value.ToString()}'", cnn);
-                    if (ds1.Tables[0].Rows.Count > 0)
+                    foreach (DataRow dr in dt.Rows)
                     {
-                        cb.SelectedItem = ds1.Tables[0].Rows[0][0].ToString();
+                        cb.Items.Add(dr[2]);
+                    }
+                }
+                else
+                {
+                    string colum = LQ.GetAllColumnNames(refInfo, cnn)[1];
+                    DataSet ds = LQ.ExecuteQ($"SELECT {colum} FROM {refInfo}", cnn);
+                    foreach (DataRow dr in ds.Tables[0].Rows)
+                    {
+                        cb.Items.Add(dr[0].ToString());
+                    }
+                    if (existing)
+                    {
+                        var ds1 = LQ.ExecuteQ($"SELECT {colum} FROM {refInfo} WHERE {Header} = '{value.ToString()}'", cnn);
+                        if (ds1.Tables[0].Rows.Count > 0)
+                        {
+                            cb.SelectedItem = ds1.Tables[0].Rows[0][0].ToString();
+                        }
                     }
                 }
                 return cb;
@@ -365,6 +444,38 @@ namespace WA_Progetto
                         txt.Text = value.ToString();
                     }
                     return txt;
+                }
+            }
+        }
+        private void SelectionDetail(object sender, EventArgs e, DataGridView dgv)
+        {
+            DataGridView dgv2 = (DataGridView)sender;
+            DataTable dt = dgv.DataSource as DataTable;
+            if (dgv2.SelectedRows.Count>0)
+            {
+                dt.DefaultView.RowFilter = $"{dgv.Columns[1].HeaderText} = '{dgv2.SelectedRows[0].Cells[0].Value}'";
+            }
+            else
+            {
+                dt.DefaultView.RowFilter = "";
+            }
+        }
+        private void FormLoad(object sender, EventArgs e)
+        {
+            Form frm = sender as Form;
+            foreach (Control dgv in frm.Controls)
+            {
+                if (dgv is DataGridView dataGridView)
+                {
+                    if (dataGridView.Tag.ToString() == Tables_name[3])
+                    {
+                        dataGridView.Columns[0].Visible = false;
+                    }
+                    else
+                    {
+                        dataGridView.Columns[0].Visible = false;
+                        dataGridView.Columns[1].Visible = false;
+                    }
                 }
             }
         }
