@@ -23,10 +23,7 @@ namespace WA_Progetto
         public Form1()
         {
             InitializeComponent();
-            Tables_name.Add("Queries");
-            Tables_name.Add("Queries_CrossModules");
-            Tables_name.Add("Queries_Parameter");
-            Tables_name.Add("Queries_Parameter_Detail");
+            Tables_name.AddRange(new[] { "Queries", "Queries_CrossModules", "Queries_Parameter", "Queries_Parameter_Detail" });
             dgv_Tabella.DataSource = LQ.ExecuteQ($"SELECT * FROM {Tables_name[0]}", cnn).Tables[0];
         }
         private void txb_searchBar_TextChanged(object sender, EventArgs e) //barra di ricerca per nome
@@ -218,15 +215,7 @@ namespace WA_Progetto
             {
                 string query = LS.FinalScript(Tables_name, values, columnNames, queriesM);
                 values[0] = values[0].Replace(" ", "_");
-                string name = null;
-                foreach (char c in values[0])
-                {
-                    if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '_')
-                    {
-                        name += c;
-                    }
-                }
-
+                string name = SanitizeFileName(values[0].Replace(" ", "_"));
                 try
                 {
                     using (SaveFileDialog saveFileDialog = new SaveFileDialog())
@@ -338,14 +327,16 @@ namespace WA_Progetto
             {
                 if (frm.Controls[i] is TextBox txt)
                 {
-                    rowt[j] = LS.TextBoxScript(txt, dgv, s, j).Item1;
-                    correct = LS.TextBoxScript(txt, dgv, s, j).Item2;
+                    var result = LS.TextBoxScript(txt, dgv, s, j);
+                    rowt[j] = result.Item1;
+                    correct = result.Item2;
                     j++;
                 }
                 else if (frm.Controls[i] is ComboBox cbx)
                 {
-                    rowt[j] = LS.ComboBoxScript(cbx, LQ, cnn, dgv, s, j, Tables_name, dt1).Item1;
-                    correct = LS.ComboBoxScript(cbx, LQ, cnn, dgv, s, j, Tables_name, dt1).Item2;
+                    var result = LS.ComboBoxScript(cbx, LQ, cnn, dgv, s, j, Tables_name, dt1);
+                    rowt[j] = result.Item1;
+                    correct = result.Item2;
                     j++;
                 }
             }
@@ -451,7 +442,7 @@ namespace WA_Progetto
         {
             DataGridView dgv2 = (DataGridView)sender;
             DataTable dt = dgv.DataSource as DataTable;
-            if (dgv2.SelectedRows.Count>0 && dgv2.SelectedRows[0].Cells[0] == null)
+            if (dgv2.SelectedRows.Count>0 && dgv2.SelectedRows[0].Index < dgv2.Rows.Count-1)
             {
                 dt.DefaultView.RowFilter = $"{dgv.Columns[1].HeaderText} = '{dgv2.SelectedRows[0].Cells[0].Value}'";
             }
@@ -478,6 +469,16 @@ namespace WA_Progetto
                     }
                 }
             }
+        }
+        private string SanitizeFileName(string input)
+        {
+            var sb = new System.Text.StringBuilder();
+            foreach (char c in input)
+            {
+                if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '_')
+                    sb.Append(c);
+            }
+            return sb.ToString();
         }
     }
 }
