@@ -451,7 +451,7 @@ namespace WA_Progetto
         {
             DataGridView dgv2 = (DataGridView)sender;
             DataTable dt = dgv.DataSource as DataTable;
-            if (dgv2.SelectedRows.Count>0)
+            if (dgv2.SelectedRows.Count>0 && dgv2.SelectedRows[0].Cells[0] == null)
             {
                 dt.DefaultView.RowFilter = $"{dgv.Columns[1].HeaderText} = '{dgv2.SelectedRows[0].Cells[0].Value}'";
             }
