@@ -6,6 +6,7 @@ using System.Data.SqlClient;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
+using System.Xml;
 
 namespace WA_Progetto
 {
@@ -65,7 +66,7 @@ namespace WA_Progetto
             Form frm_Querie = new Form //Creazione Form
             {
                 Text = $"Creazione nuovo record",
-                Size = new Size(1050, 50 + 30 * row.Cells.Count),
+                Size = new Size(1150, 50 + 30 * row.Cells.Count),
                 StartPosition = FormStartPosition.CenterParent
             };
             int y = 10;
@@ -88,14 +89,23 @@ namespace WA_Progetto
 
                 y = y + 30;
             }
+            Label lbl1 = new Label
+            {
+                Text = "Edit Existing Row: Select a row in the DataGridView and double-click on it to open the form.\nAdd New Row: Select the empty row at the bottom of the DataGridView and double-click on it to open the form",
+                Location = new Point(430, 5),
+                AutoSize = true,
+                Anchor = AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Left,
+                Font = new Font("Microsoft Sans Serif", 6.5F, FontStyle.Regular, GraphicsUnit.Point)
+            };
+            frm_Querie.Controls.Add(lbl1);
             DataGridView dgv1 = new DataGridView //Creazione datagridview per tabella Query_CrossModules
             {
                 Tag = "Queries_CrossModules",
-                Location = new Point(430, 10),
-                Width = 290,
+                Location = new Point(430, 30),
+                Width = 340,
                 ReadOnly = true,
-                Height = frm_Querie.Height / 2 - 50,
-                Anchor = AnchorStyles.Right | AnchorStyles.Top,
+                Height = frm_Querie.Height / 2 - 60,
+                Anchor = AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Left,
             };
             if (existing)
             {
@@ -111,12 +121,12 @@ namespace WA_Progetto
             DataGridView dgv2 = new DataGridView
             {
                 Tag = "Queries_Parameter",
-                Location = new Point(430, frm_Querie.Height / 2 - 30),
-                Width = 290,
+                Location = new Point(430, frm_Querie.Height / 2 - 20),
+                Width = 340,
                 ReadOnly = true,
-                Height = frm_Querie.Height / 2 - 50,
+                Height = frm_Querie.Height / 2 - 60,
                 DataSource = LQ.ExecuteQ($"SELECT * FROM Queries_Parameter WHERE ID_Queries = (SELECT ISNULL(MAX(Id_Queries),0) +1 FROM [dbo].[{Tables_name[0]}])", cnn).Tables[0],
-                Anchor = AnchorStyles.Right | AnchorStyles.Top,
+                Anchor = AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Bottom,
             };
             if (existing)
             {
@@ -133,12 +143,12 @@ namespace WA_Progetto
             DataGridView dgv3 = new DataGridView
             {
                 Tag = "Queries_Parameter_Detail",
-                Location = new Point(730, 10),
-                Width = 290,
+                Location = new Point(780, 30),
+                Width = 340,
                 ReadOnly = true,
-                Height = frm_Querie.Height - 90,
+                Height = frm_Querie.Height - 110,
                 DataSource = LQ.ExecuteQ($"SELECT * FROM Queries_Parameter_Detail WHERE ID_Queries_Parameter = (SELECT ISNULL(MAX(ID_Queries_Parameter),0) +1 FROM [dbo].[{Tables_name[2]}])", cnn).Tables[0],
-                Anchor = AnchorStyles.Right | AnchorStyles.Top,
+                Anchor = AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Bottom,
             };
             if (existing)
             {
@@ -163,8 +173,8 @@ namespace WA_Progetto
             {
                 Text = "Generate .sql script",
                 Location = new Point(10, frm_Querie.Height - 75),
-                Width = 1010,
-                Anchor = AnchorStyles.Right | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Top,
+                Width = 1110,
+                Anchor = AnchorStyles.Right | AnchorStyles.Bottom | AnchorStyles.Left,
             };
             btn_Confirm.Click += (s, ev) => btn_Confirm_onClick(s, ev, frm_Querie);
             frm_Querie.Controls.Add(btn_Confirm);
@@ -202,7 +212,7 @@ namespace WA_Progetto
                     DataTable dt = dgv.DataSource as DataTable;
                     dt.DefaultView.RowFilter = "";
                     List<string> strings = LQ.GetAllColumnNames(dgv.Tag.ToString(), cnn);
-                    string columns2 = string.Join(", ", strings);
+                    string columns2 = string.Join(",\n\t\t\t", strings);
                     if (dgv.Tag.ToString() != Tables_name[3])
                     {
                         for (int y = 0; y < dgv.Rows.Count - 1; y++)
@@ -226,6 +236,7 @@ namespace WA_Progetto
             if (correct) //composizione e creazione file.sql
             {
                 string query = LS.FinalScript(Tables_name, values, columnNames, queriesM);
+
                 values[0] = values[0].Replace(" ", "_");
                 string name = SanitizeFileName(values[0].Replace(" ", "_"));
                 try
@@ -388,7 +399,7 @@ namespace WA_Progetto
                     DropDownStyle = ComboBoxStyle.DropDownList,
                     Location = new Point(170, y),
                     Width = 240,
-                    Anchor = AnchorStyles.Right | AnchorStyles.Left | AnchorStyles.Top,
+                    Anchor = AnchorStyles.Left | AnchorStyles.Top,
                     Tag = refInfo
 
                 };
@@ -426,7 +437,7 @@ namespace WA_Progetto
                     {
                         DropDownStyle = ComboBoxStyle.DropDownList,
                         Location = new Point(170, y),
-                        Anchor = AnchorStyles.Right | AnchorStyles.Left | AnchorStyles.Top,
+                        Anchor = AnchorStyles.Left | AnchorStyles.Top,
                         Width = 240
                     };
                     cb.Items.Add("True");
@@ -443,7 +454,7 @@ namespace WA_Progetto
                     {
                         Text = "",
                         Location = new Point(170, y),
-                        Anchor = AnchorStyles.Right | AnchorStyles.Left | AnchorStyles.Top,
+                        Anchor = AnchorStyles.Left | AnchorStyles.Top,
                         Width = 240,
                     };
                     if (existing)
