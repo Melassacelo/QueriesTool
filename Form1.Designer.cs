@@ -35,6 +35,7 @@
             this.label2 = new System.Windows.Forms.Label();
             this.btn_Add = new System.Windows.Forms.Button();
             this.btn_Duplicate = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_Tabella)).BeginInit();
             this.SuspendLayout();
             // 
@@ -63,7 +64,6 @@
             this.txb_searchBar.Name = "txb_searchBar";
             this.txb_searchBar.Size = new System.Drawing.Size(117, 26);
             this.txb_searchBar.TabIndex = 1;
-            this.txb_searchBar.TextChanged += new System.EventHandler(this.txb_searchBar_TextChanged);
             // 
             // txb_SearchId
             // 
@@ -71,7 +71,6 @@
             this.txb_SearchId.Name = "txb_SearchId";
             this.txb_SearchId.Size = new System.Drawing.Size(98, 26);
             this.txb_SearchId.TabIndex = 2;
-            this.txb_SearchId.TextChanged += new System.EventHandler(this.txb_SearchId_TextChanged);
             // 
             // label1
             // 
@@ -114,11 +113,22 @@
             this.btn_Duplicate.UseVisualStyleBackColor = true;
             this.btn_Duplicate.Click += new System.EventHandler(this.btn_Create_Form);
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(272, 13);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(101, 59);
+            this.button1.TabIndex = 7;
+            this.button1.Text = "Search";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1184, 663);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.btn_Duplicate);
             this.Controls.Add(this.btn_Add);
             this.Controls.Add(this.label2);
@@ -143,6 +153,7 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button btn_Add;
         private System.Windows.Forms.Button btn_Duplicate;
+        private System.Windows.Forms.Button button1;
     }
 }
 

@@ -26,13 +26,21 @@ namespace WA_Progetto
             Tables_name.AddRange(new[] { "Queries", "Queries_CrossModules", "Queries_Parameter", "Queries_Parameter_Detail" });
             dgv_Tabella.DataSource = LQ.ExecuteQ($"SELECT * FROM {Tables_name[0]}", cnn).Tables[0];
         }
-        private void txb_searchBar_TextChanged(object sender, EventArgs e) //barra di ricerca per nome
+
+        private void button1_Click(object sender, EventArgs e)
         {
-            dgv_Tabella.DataSource = LQ.ExecuteQWithParam($"SELECT * FROM {Tables_name[0]} WHERE Name LIKE @searchText + '%'", new SqlParameter("@searchText", txb_searchBar.Text), cnn).Tables[0];
-        }
-        private void txb_SearchId_TextChanged(object sender, EventArgs e) //barra di ricerca per id
-        {
-            dgv_Tabella.DataSource = LQ.ExecuteQWithParam($"SELECT * FROM {Tables_name[0]} WHERE ID_Queries LIKE @searchId + '%'", new SqlParameter("@searchId", txb_SearchId.Text), cnn).Tables[0];
+            if (!string.IsNullOrEmpty(txb_SearchId.Text) && !string.IsNullOrEmpty(txb_searchBar.Text))
+            {
+                dgv_Tabella.DataSource = LQ.ExecuteQ($"SELECT * FROM {Tables_name[0]} WHERE Name LIKE '%{txb_searchBar.Text}%' AND ID_Queries LIKE '%{txb_SearchId.Text}%'", cnn).Tables[0];
+            }
+            else if (!string.IsNullOrEmpty(txb_SearchId.Text))
+            {
+                dgv_Tabella.DataSource = LQ.ExecuteQWithParam($"SELECT * FROM {Tables_name[0]} WHERE ID_Queries LIKE '%' + @searchId + '%'", new SqlParameter("@searchId", txb_SearchId.Text), cnn).Tables[0];
+            }
+            else if (!string.IsNullOrEmpty(txb_searchBar.Text))
+            {
+                dgv_Tabella.DataSource = LQ.ExecuteQWithParam($"SELECT * FROM {Tables_name[0]} WHERE Name LIKE '%' + @searchText + '%'", new SqlParameter("@searchText", txb_searchBar.Text), cnn).Tables[0];
+            }
         }
         private void dgv_Tabella_SelectionChanged(object sender, EventArgs e) //disattivazione e attivazione pulsante duplicazione
         {
@@ -62,6 +70,10 @@ namespace WA_Progetto
             };
             int y = 10;
             List<string> fkColumns = LQ.GetForeignKeyColumns(Tables_name[0], cnn);
+            if (fkColumns.Contains("ID_Agreement")) 
+            {
+                fkColumns.Remove("ID_Agreement");
+            }
             for (int i = 1; i < row.Cells.Count; i++)
             {
                 Label lbl = new Label //Creazione LAbel
@@ -258,7 +270,10 @@ namespace WA_Progetto
             if (dgv.SelectedRows.Count > 0)
             {
                 dgvr = dgv.SelectedRows[0];
-                existing = true;
+                if (!dgv.SelectedRows[0].IsNewRow)
+                {
+                    existing = true;
+                }
             }
             if (dgv != null)
             {
