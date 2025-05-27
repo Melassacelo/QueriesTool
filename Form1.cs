@@ -262,19 +262,20 @@ namespace WA_Progetto
             }
             if (dgv != null)
             {
-                Form frm_Module = new Form //Form
-                {
-                    Text = $"Creazione nuovo record",
-                    Size = new Size(450, 100 + 30 * (dgvr.Cells.Count)),
-                    StartPosition = FormStartPosition.CenterParent
-                };
-                int y = 10;
-                List<string> fkColumns = LQ.GetForeignKeyColumns(dgv.Tag.ToString(), cnn);
                 int n = 2;
                 if (dgv.Tag.ToString() == Tables_name[3])
                 {
                     n = 1;
                 }
+                Form frm_Module = new Form //Form
+                {
+                    Text = $"Creazione nuovo record",
+                    Size = new Size(450, 100 + 30 * (dgvr.Cells.Count-n)),
+                    StartPosition = FormStartPosition.CenterParent
+                };
+                int y = 10;
+                List<string> fkColumns = LQ.GetForeignKeyColumns(dgv.Tag.ToString(), cnn);
+
                 for (int i = n; i < dgvr.Cells.Count; i++)
                 {
                     Label lbl = new Label //Label
@@ -344,11 +345,11 @@ namespace WA_Progetto
             {
                 if (dgv.SelectedRows.Count>0)
                 {
+                    rowt[0] = dgv.SelectedRows[0].Cells[0].Value;
                     dt.Rows.RemoveAt(dgv.SelectedRows[0].Index);
                 }
-                if (dgv.Tag.ToString() == Tables_name[2])
+                else if (dgv.Tag.ToString() == Tables_name[2])
                 {
-
                     rowt[0] = Convert.ToInt32(LQ.ExecuteQ($"SELECT ISNULL(MAX(Id_Queries_Parameter), 0) + {a} FROM [dbo].[{dgv.Tag.ToString()}]", cnn).Tables[0].Rows[0][0]);
                     a++;
                 }
