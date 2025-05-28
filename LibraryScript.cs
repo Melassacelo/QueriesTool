@@ -10,32 +10,32 @@ namespace WA_Progetto
     {
         public string FinalScript(List<string> Tables_name, List<string> values, List<string> columnNames, List<string> queriesM)
         {
-            string columns = string.Join(",\n\t\t\t", columnNames);
+            string columns = string.Join(", ", columnNames);
             string parameters = $"@NewIdQueries";
             foreach (string v in values)
             {
                 if (string.IsNullOrEmpty(v))
                 {
-                    parameters += ",\n\t\t\t NULL";
+                    parameters += ", NULL";
                 }
                 else
                 {
-                    parameters += ",\n\t\t\t '" + v + "'";
+                    parameters += ", '" + v + "'";
                 }
             }
             string queriesM1 = string.Join("\n", queriesM);
-            string query = $"DECLARE @NewIdQueries int\n" +
-                $"DECLARE @NewIdQueriesParameter int\n\n" +
-                $"IF NOT EXISTS (SELECT 1\n\t\t\t" +
-                $"FROM [dbo].[{Tables_name[0]}]\n\t\t\t" +
-                $"WHERE [Name]='{values[0]}')\n\t" +
-                $"BEGIN\n\t\t" +
-                $"SET @NewIdQueries = (SELECT ISNULL(MAX({columnNames[0]}), 0) + 1\n\t\t\t" +
-                $"FROM [dbo].[{Tables_name[0]}])\n\n\t\t" +
-                $"INSERT INTO [dbo].{Tables_name[0]}\n\t\t\t" +
-                $"({columns})\n\t\t" +
-                $"VALUES ({parameters});\n\t" +
-                $"END\n\n" + queriesM1;
+            string query = $"DECLARE @NewIdQueries int " +
+                $"DECLARE @NewIdQueriesParameter int " +
+                $"IF NOT EXISTS (SELECT 1 " +
+                $"FROM [dbo].[{Tables_name[0]}] " +
+                $"WHERE [Name]='{values[0]}') " +
+                $"BEGIN " +
+                $"SET @NewIdQueries = (SELECT ISNULL(MAX({columnNames[0]}), 0) + 1 " +
+                $"FROM [dbo].[{Tables_name[0]}]) " +
+                $"INSERT INTO [dbo].{Tables_name[0]} " +
+                $"({columns}) " +
+                $"VALUES ({parameters}); " +
+                $"END " + queriesM1;
             return query;
         }
         public string DataGridViewScript(DataGridView dgv, List<string> Tables_name, List<string> strings, string columns2, int y)
@@ -43,50 +43,50 @@ namespace WA_Progetto
             string qM = "";
             if (dgv.Tag.ToString() == Tables_name[2])
             {
-                qM = $"IF NOT EXISTS (SELECT 1\n\t\t\t" +
-                    $"FROM [dbo].[{dgv.Tag.ToString()}]\n\t\t\t" +
-                    $"WHERE [Description]='{dgv.Rows[y].Cells[3].Value}')\n\t" +
-                    $"BEGIN\n\t\t" +
-                    $"SET @NewIdQueriesParameter = (SELECT ISNULL(MAX({strings[0]}), 0) + 1\n\t\t\t" +
-                    $"FROM [dbo].[{dgv.Tag.ToString()}])\n\n\t\t";
+                qM = $"IF NOT EXISTS (SELECT 1 " +
+                    $"FROM [dbo].[{dgv.Tag.ToString()}] " +
+                    $"WHERE [Description]='{dgv.Rows[y].Cells[3].Value}') " +
+                    $"BEGIN " +
+                    $"SET @NewIdQueriesParameter = (SELECT ISNULL(MAX({strings[0]}), 0) + 1 " +
+                    $"FROM [dbo].[{dgv.Tag.ToString()}]) ";
             }
             string parameters2 = "";
             for (int k = 2; k < dgv.Rows[y].Cells.Count; k++)
             {
                 if (dgv.Rows[y].Cells[k].Value.ToString() != "")
                 {
-                    parameters2 += ",\n\t\t\t '" + dgv.Rows[y].Cells[k].Value + "'";
+                    parameters2 += ", '" + dgv.Rows[y].Cells[k].Value + "'";
                 }
                 else
                 {
-                    parameters2 += ",\n\t\t\t NULL";
+                    parameters2 += ", NULL";
                 }
 
             }
             if (dgv.Tag.ToString() == Tables_name[3])
             {
-                qM += $"INSERT INTO [dbo].[{dgv.Tag.ToString()}]\n\t\t\t" +
-                    $"({columns2})\n\t\t" +
-                    $"VALUES ((SELECT ISNULL(MAX({strings[0]}), 0) + 1 FROM [dbo].[{dgv.Tag.ToString()}]),\n\t\t\t" +
-                    $"@NewIdQueriesParameter{parameters2});\n";
+                qM += $"INSERT INTO [dbo].[{dgv.Tag.ToString()}] " +
+                    $"({columns2}) " +
+                    $"VALUES ((SELECT ISNULL(MAX({strings[0]}), 0) + 1 FROM [dbo].[{dgv.Tag.ToString()}]), " +
+                    $"@NewIdQueriesParameter{parameters2}); ";
             }else if (dgv.Tag.ToString() == Tables_name[2])
             {
-                qM += $"INSERT INTO [dbo].[{dgv.Tag.ToString()}]\n\t\t\t" +
-                    $"({columns2})\n\t\t" +
-                    $"VALUES (@NewIdQueriesParameter,\n\t\t\t" +
-                    $"@NewIdQueries{parameters2});\n";
+                qM += $"INSERT INTO [dbo].[{dgv.Tag.ToString()}] " +
+                    $"({columns2}) " +
+                    $"VALUES (@NewIdQueriesParameter, " +
+                    $"@NewIdQueries{parameters2}); ";
             }
             else
             {
-                qM += $"INSERT INTO [dbo].[{dgv.Tag.ToString()}]\n\t\t\t" +
-                    $"({columns2})\n\t\t" +
-                    $"VALUES ((SELECT ISNULL(MAX({strings[0]}), 0) + 1 FROM [dbo].[{dgv.Tag.ToString()}]),\n\t\t\t" +
-                    $"@NewIdQueries{parameters2});\n";
+                qM += $"INSERT INTO [dbo].[{dgv.Tag.ToString()}] " +
+                    $"({columns2}) " +
+                    $"VALUES ((SELECT ISNULL(MAX({strings[0]}), 0) + 1 FROM [dbo].[{dgv.Tag.ToString()}]), " +
+                    $"@NewIdQueries{parameters2}); ";
             }
 
             if (dgv.Tag.ToString() == Tables_name[2])
             {
-                qM += $"\tEND\n";
+                qM += $"END ";
             }
             return qM;
         }

@@ -7,6 +7,9 @@ using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 using System.Xml;
+using PoorMansTSqlFormatterRedux;
+using PoorMansTSqlFormatterRedux.Formatters;
+using PoorMansTSqlFormatterRedux.Interfaces;
 
 namespace WA_Progetto
 {
@@ -239,6 +242,7 @@ namespace WA_Progetto
 
                 values[0] = values[0].Replace(" ", "_");
                 string name = SanitizeFileName(values[0].Replace(" ", "_"));
+                string formatted = SqlFormattingManager.DefaultFormat(query);
                 try
                 {
                     using (SaveFileDialog saveFileDialog = new SaveFileDialog())
@@ -251,7 +255,7 @@ namespace WA_Progetto
                         {
                             using (StreamWriter sw = new StreamWriter(saveFileDialog.FileName))
                             {
-                                sw.WriteLine(query);
+                                sw.WriteLine(formatted);
                             }
                             MessageBox.Show("SQL creata con successo");
                             frm_Querie.Close();
