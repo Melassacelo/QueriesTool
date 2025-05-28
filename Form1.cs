@@ -6,10 +6,7 @@ using System.Data.SqlClient;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
-using System.Xml;
 using PoorMansTSqlFormatterRedux;
-using PoorMansTSqlFormatterRedux.Formatters;
-using PoorMansTSqlFormatterRedux.Interfaces;
 
 namespace WA_Progetto
 {
@@ -74,7 +71,7 @@ namespace WA_Progetto
             };
             int y = 10;
             List<string> fkColumns = LQ.GetForeignKeyColumns(Tables_name[0], cnn);
-            if (fkColumns.Contains("ID_Agreement")) 
+            if (fkColumns.Contains("ID_Agreement"))
             {
                 fkColumns.Remove("ID_Agreement");
             }
@@ -101,6 +98,7 @@ namespace WA_Progetto
                 Font = new Font("Microsoft Sans Serif", 6.5F, FontStyle.Regular, GraphicsUnit.Point)
             };
             frm_Querie.Controls.Add(lbl1);
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             DataGridView dgv1 = new DataGridView //Creazione datagridview per tabella Query_CrossModules
             {
                 Tag = "Queries_CrossModules",
@@ -110,17 +108,17 @@ namespace WA_Progetto
                 Height = frm_Querie.Height / 2 - 60,
                 Anchor = AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Left,
             };
+            string q1 = BuildSelectWithJoins(dgv1.Tag.ToString(), cnn, LQ, 1, $"{Tables_name[0]}.ID_Queries = (SELECT ISNULL(MAX(Id_Queries), 0) + 1 FROM[dbo].[{Tables_name[0]}])");
             if (existing)
             {
-                dgv1.DataSource = LQ.ExecuteQ($"SELECT * FROM Queries_CrossModules WHERE ID_Queries = {row.Cells[0].Value}", cnn).Tables[0];
+                q1 = BuildSelectWithJoins(dgv1.Tag.ToString(), cnn, LQ, 1, $"{Tables_name[0]}.ID_Queries = {row.Cells[0].Value}");
             }
-            else
-            {
-                dgv1.DataSource = LQ.ExecuteQ($"SELECT * FROM Queries_CrossModules WHERE ID_Queries = (SELECT ISNULL(MAX(Id_Queries),0) +1 FROM [dbo].[{Tables_name[0]}])", cnn).Tables[0];
-            }
+            DataTable dtdgv1 = LQ.ExecuteQ(q1, cnn).Tables[0];
+            dgv1.DataSource = dtdgv1;
             dgv1.DoubleClick += (s, ev) => ModuleCreation(s, ev);
             dgv1.KeyDown += (s, ev) => RowElimination(s, ev, dgv1); //Creazione datagridview per tabella Query_parameters
             frm_Querie.Controls.Add(dgv1);
+            //////////////////////////////////////////////////////////////////////////////////////
             DataGridView dgv2 = new DataGridView
             {
                 Tag = "Queries_Parameter",
@@ -128,21 +126,18 @@ namespace WA_Progetto
                 Width = 340,
                 ReadOnly = true,
                 Height = frm_Querie.Height / 2 - 60,
-                DataSource = LQ.ExecuteQ($"SELECT * FROM Queries_Parameter WHERE ID_Queries = (SELECT ISNULL(MAX(Id_Queries),0) +1 FROM [dbo].[{Tables_name[0]}])", cnn).Tables[0],
                 Anchor = AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Bottom,
             };
+            string q2 = BuildSelectWithJoins(dgv2.Tag.ToString(), cnn, LQ, 1, $"{Tables_name[0]}.ID_Queries = (SELECT ISNULL(MAX(Id_Queries),0) +1 FROM [dbo].[{Tables_name[0]}])");
             if (existing)
             {
-                dgv2.DataSource = LQ.ExecuteQ($"SELECT * FROM Queries_Parameter WHERE ID_Queries = {row.Cells[0].Value}", cnn).Tables[0];
+                q2 = BuildSelectWithJoins(dgv2.Tag.ToString(), cnn, LQ, 1, $"{Tables_name[0]}.ID_Queries = {row.Cells[0].Value}");
             }
-            else
-            {
-                dgv2.DataSource = LQ.ExecuteQ($"SELECT * FROM Queries_Parameter WHERE ID_Queries = (SELECT ISNULL(MAX(Id_Queries),0) +1 FROM [dbo].[{Tables_name[0]}])", cnn).Tables[0];
-            }
-            dgv2.DoubleClick += (s, ev) => ModuleCreation(s, ev);
+            DataTable dtdgv2 = LQ.ExecuteQ(q2, cnn).Tables[0];
+            dgv2.DataSource = dtdgv2;
             dgv2.KeyDown += (s, ev) => RowElimination(s, ev, dgv2);
             frm_Querie.Controls.Add(dgv2);
-
+            ////////////////////////////////////////////////////////////////////////////////////////////
             DataGridView dgv3 = new DataGridView
             {
                 Tag = "Queries_Parameter_Detail",
@@ -150,28 +145,30 @@ namespace WA_Progetto
                 Width = 340,
                 ReadOnly = true,
                 Height = frm_Querie.Height - 110,
-                DataSource = LQ.ExecuteQ($"SELECT * FROM Queries_Parameter_Detail WHERE ID_Queries_Parameter = (SELECT ISNULL(MAX(ID_Queries_Parameter),0) +1 FROM [dbo].[{Tables_name[2]}])", cnn).Tables[0],
                 Anchor = AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Bottom,
             };
+            string q3 = BuildSelectWithJoins(dgv3.Tag.ToString(), cnn, LQ, 2, $"{Tables_name[2]}.ID_Queries_Parameter = (SELECT ISNULL(MAX(ID_Queries_Parameter),0) +1 FROM [dbo].[{Tables_name[2]}])");
+            DataTable dt = new DataTable();
             if (existing)
             {
-                DataTable dt = new DataTable();
                 DataTable dt2 = dgv2.DataSource as DataTable;
                 foreach (DataRow drv in dt2.Rows)
                 {
-                    DataTable dt1 = LQ.ExecuteQ($"SELECT * FROM Queries_Parameter_Detail WHERE ID_Queries_Parameter = {drv[0]}", cnn).Tables[0];
+                    q3 = BuildSelectWithJoins(dgv3.Tag.ToString(), cnn, LQ, 2, $"{Tables_name[2]}.ID_Queries_Parameter = {drv[0]}");
+                    DataTable dt1 = LQ.ExecuteQ(q3, cnn).Tables[0];
                     dt.Merge(dt1);
                 }
-                dgv3.DataSource = dt;
             }
             else
             {
-                dgv3.DataSource = LQ.ExecuteQ($"SELECT * FROM Queries_Parameter_Detail WHERE ID_Queries_Parameter = (SELECT ISNULL(MAX(ID_Queries_Parameter),0) +1 FROM [dbo].[{Tables_name[2]}])", cnn).Tables[0];
+                dt = LQ.ExecuteQ(q3, cnn).Tables[0];
             }
-            dgv3.DoubleClick += (s, ev) => ModuleCreation(s,ev, dgv2.DataSource as DataTable);
+            dgv3.DataSource = dt;
+            dgv3.DoubleClick += (s, ev) => ModuleCreation(s, ev, dgv2.DataSource as DataTable);
             dgv3.KeyDown += (s, ev) => RowElimination(s, ev, dgv3);
             frm_Querie.Controls.Add(dgv3);
             dgv2.SelectionChanged += (s, ev) => SelectionDetail(s, ev, dgv3);
+            dgv2.DoubleClick += (s, ev) => ModuleCreation(s, ev, null, dgv3);
             Button btn_Confirm = new Button //pulsante per la creazione del file.sql
             {
                 Text = "Generate .sql script",
@@ -220,15 +217,15 @@ namespace WA_Progetto
                     {
                         for (int y = 0; y < dgv.Rows.Count - 1; y++)
                         {
-                            queriesM.Add(LS.DataGridViewScript(dgv, Tables_name, strings, columns2, y));
+                            queriesM.Add(LS.DataGridViewScript(dgv, Tables_name, strings, columns2, y, LQ, cnn));
                             if (dgv.Tag.ToString() == Tables_name[2])
                             {
-                                DataGridView dgv1 = frm_Querie.Controls[i+1] as DataGridView;
+                                DataGridView dgv1 = frm_Querie.Controls[i + 1] as DataGridView;
                                 DataTable dt1 = dgv1.DataSource as DataTable;
-                                dt1.DefaultView.RowFilter = $"{dgv1.Columns[1].HeaderText} = '{dgv.Rows[y].Cells[0].Value}'";
-                                for (int x = 0; x < dgv1.Rows.Count -1; x++)
+                                dt1.DefaultView.RowFilter = $"{dgv1.Columns[1].HeaderText} = '{dgv.Rows[y].Cells[2].Value}'";
+                                for (int x = 0; x < dgv1.Rows.Count - 1; x++)
                                 {
-                                    queriesM.Add(LS.DataGridViewScript(dgv1, Tables_name, LQ.GetAllColumnNames(dgv1.Tag.ToString(), cnn), string.Join(", ", LQ.GetAllColumnNames(dgv1.Tag.ToString(), cnn)), x));
+                                    queriesM.Add(LS.DataGridViewScript(dgv1, Tables_name, LQ.GetAllColumnNames(dgv1.Tag.ToString(), cnn), string.Join(", ", LQ.GetAllColumnNames(dgv1.Tag.ToString(), cnn)), x, LQ, cnn));
                                 }
                             }
                         }
@@ -277,7 +274,7 @@ namespace WA_Progetto
 
         }
 
-        private void ModuleCreation(object sender, EventArgs e, DataTable dt = null) //modulo per inserimento Queries_CrossModules e Queries_Parameters
+        private void ModuleCreation(object sender, EventArgs e, DataTable dt = null, DataGridView dv = null) //modulo per inserimento Queries_CrossModules e Queries_Parameters
         {
             DataGridView dgv = sender as DataGridView;
             DataGridViewRow dgvr = dgv.Rows[0];
@@ -300,7 +297,7 @@ namespace WA_Progetto
                 Form frm_Module = new Form //Form
                 {
                     Text = $"Creazione nuovo record",
-                    Size = new Size(450, 100 + 30 * (dgvr.Cells.Count-n)),
+                    Size = new Size(450, 100 + 30 * (dgvr.Cells.Count - n)),
                     StartPosition = FormStartPosition.CenterParent
                 };
                 int y = 10;
@@ -315,7 +312,7 @@ namespace WA_Progetto
                         AutoSize = true
                     };
                     frm_Module.Controls.Add(lbl);
-                    frm_Module.Controls.Add(CreateInputControl(dgvr.Cells[i].ValueType, fkColumns, dgv.Columns[i].HeaderText, dgv.Tag.ToString(), dgv.Rows[0].Cells[i].Value, y, existing,dt));
+                    frm_Module.Controls.Add(CreateInputControl(dgvr.Cells[i].ValueType, fkColumns, dgv.Columns[i].HeaderText, dgv.Tag.ToString(), dgvr.Cells[i].Value, y, existing, dt));
                     y = y + 30;
                 }
                 Button btn_ConfirmM = new Button //pulsante conferma
@@ -324,7 +321,7 @@ namespace WA_Progetto
                     Location = new Point(10, frm_Module.Height - 75),
                     Width = 410,
                 };
-                btn_ConfirmM.Click += (s, ev) => btn_ConfirmM_onClick(s, ev, frm_Module, dgv, dt);
+                btn_ConfirmM.Click += (s, ev) => btn_ConfirmM_onClick(s, ev, frm_Module, dgv, dt, dv);
                 frm_Module.Controls.Add(btn_ConfirmM);
                 frm_Module.ShowDialog();
             }
@@ -343,7 +340,7 @@ namespace WA_Progetto
             }
         }
 
-        private void btn_ConfirmM_onClick(object sender, EventArgs e, Form frm, DataGridView dgv, DataTable dt1) //conferma inserimento querie associata
+        private void btn_ConfirmM_onClick(object sender, EventArgs e, Form frm, DataGridView dgv, DataTable dt1, DataGridView dv = null) //conferma inserimento querie associata
         {
             DataTable dt = dgv.DataSource as DataTable;
             DataRow rowt = dt.NewRow();
@@ -373,9 +370,30 @@ namespace WA_Progetto
             }
             if (correct)
             {
-                if (dgv.SelectedRows.Count>0)
+                if (dgv.SelectedRows.Count > 0 && !dgv.SelectedRows[0].IsNewRow)
                 {
                     rowt[0] = dgv.SelectedRows[0].Cells[0].Value;
+                    if (dgv.Tag.ToString() == Tables_name[2])
+                    {
+                        DataTable dataTable = dv.DataSource as DataTable;
+                        if (dataTable != null)
+                        {
+                            foreach (DataGridViewRow row in dv.Rows)
+                            {
+                                if (!row.IsNewRow)
+                                {
+                                    if (row.Cells[1].Value.ToString() == dgv.SelectedRows[0].Cells[2].Value.ToString())
+                                    {
+                                        // Trova la riga corrispondente nella DataTable e aggiorna il valore
+                                        int rowIndex = row.Index;
+                                        dataTable.Rows[rowIndex][1] = rowt[2];
+                                        // Aggiorna anche la cella della DataGridView per coerenza visiva
+                                        row.Cells[1].Value = rowt[2];
+                                    }
+                                }
+                            }
+                        }
+                    }
                     dt.Rows.RemoveAt(dgv.SelectedRows[0].Index);
                 }
                 else if (dgv.Tag.ToString() == Tables_name[2])
@@ -392,7 +410,7 @@ namespace WA_Progetto
                 MessageBox.Show(string.Join(", ", s) + " are required");
             }
         }
-        private Control CreateInputControl(Type valueType, List<string> fkColumns, string Header, string tag,  object value, int y, bool existing, DataTable dt=null)
+        private Control CreateInputControl(Type valueType, List<string> fkColumns, string Header, string tag, object value, int y, bool existing, DataTable dt = null)
         {
 
             if (fkColumns.Contains(Header) && !string.IsNullOrEmpty(tag)) //Controllo campi associati a tabelle esterne
@@ -407,11 +425,15 @@ namespace WA_Progetto
                     Tag = refInfo
 
                 };
-                if (Tables_name.Contains(refInfo) && dt !=null)
+                if (Tables_name.Contains(refInfo) && dt != null)
                 {
                     foreach (DataRow dr in dt.Rows)
                     {
                         cb.Items.Add(dr[2]);
+                    }
+                    if (existing)
+                    {
+                        cb.SelectedItem = value;
                     }
                 }
                 else
@@ -424,7 +446,7 @@ namespace WA_Progetto
                     }
                     if (existing)
                     {
-                        var ds1 = LQ.ExecuteQ($"SELECT {colum} FROM {refInfo} WHERE {Header} = '{value.ToString()}'", cnn);
+                        var ds1 = LQ.ExecuteQ($"SELECT {colum} FROM {refInfo} WHERE {Header} = '{cb.Items.IndexOf(value.ToString()) + 1}'", cnn);
                         if (ds1.Tables[0].Rows.Count > 0)
                         {
                             cb.SelectedItem = ds1.Tables[0].Rows[0][0].ToString();
@@ -473,9 +495,9 @@ namespace WA_Progetto
         {
             DataGridView dgv2 = (DataGridView)sender;
             DataTable dt = dgv.DataSource as DataTable;
-            if (dgv2.SelectedRows.Count>0 && dgv2.SelectedRows[0].Index < dgv2.Rows.Count-1)
+            if (dgv2.SelectedRows.Count > 0 && dgv2.SelectedRows[0].Index < dgv2.Rows.Count - 1)
             {
-                dt.DefaultView.RowFilter = $"{dgv.Columns[1].HeaderText} = '{dgv2.SelectedRows[0].Cells[0].Value}'";
+                dt.DefaultView.RowFilter = $"{dgv.Columns[1].HeaderText} = '{dgv2.SelectedRows[0].Cells[2].Value}'";
             }
             else
             {
@@ -511,5 +533,56 @@ namespace WA_Progetto
             }
             return sb.ToString();
         }
+
+        private string BuildSelectWithJoins(string tableName, SqlConnection cnn, LibraryQuery lq, int o, string condizione = null)
+        {
+            // Recupera tutte le colonne della tabella  
+            List<string> allColumns = lq.GetAllColumnNames(tableName, cnn);
+            // Recupera le colonne che sono chiavi esterne  
+            List<string> fkColumns = lq.GetForeignKeyColumns(tableName, cnn);
+
+            // Lista per le colonne da selezionare  
+            List<string> selectColumns = new List<string>();
+            // Lista per le join  
+            List<string> joins = new List<string>();
+
+            foreach (var col in allColumns)
+            {
+                if (fkColumns.Contains(col))
+                {
+                    // Trova la tabella referenziata  
+                    string refTable = lq.GetReferencedTable(tableName, col, cnn);
+                    // Prende la seconda colonna della tabella referenziata  
+                    List<string> refColumns = lq.GetAllColumnNames(refTable, cnn);
+                    if (refColumns.Count < 2)
+                        continue; // Salta se la tabella referenziata ha meno di 2 colonne  
+
+                    string refCol = refColumns[o];
+
+                    // Aggiunge la colonna della tabella referenziata al SELECT  
+                    selectColumns.Add($"{refTable}.{refCol} AS [{col}]");
+
+                    // Costruisce la JOIN  
+                    joins.Add($"INNER JOIN {refTable} ON {tableName}.{col} = {refTable}.{refColumns[0]}");
+                }
+                else
+                {
+                    // Colonna normale della tabella principale  
+                    selectColumns.Add($"{tableName}.{col}");
+                }
+            }
+
+            // Costruisce la query finale  
+            string selectClause = string.Join(", ", selectColumns);
+            string joinClause = string.Join(" ", joins);
+
+            string q = $"SELECT {selectClause} FROM {tableName} {joinClause}";
+            if (!string.IsNullOrWhiteSpace(condizione))
+            {
+                q += $" WHERE {condizione}";
+            }
+            return q;
+        }
+
     }
 }

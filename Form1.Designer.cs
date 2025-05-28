@@ -56,6 +56,7 @@
             this.dgv_Tabella.RowTemplate.Height = 28;
             this.dgv_Tabella.Size = new System.Drawing.Size(1158, 560);
             this.dgv_Tabella.TabIndex = 0;
+            this.dgv_Tabella.Tag = "Queries";
             this.dgv_Tabella.SelectionChanged += new System.EventHandler(this.dgv_Tabella_SelectionChanged);
             // 
             // txb_searchBar

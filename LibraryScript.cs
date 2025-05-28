@@ -38,8 +38,9 @@ namespace WA_Progetto
                 $"END " + queriesM1;
             return query;
         }
-        public string DataGridViewScript(DataGridView dgv, List<string> Tables_name, List<string> strings, string columns2, int y)
+        public string DataGridViewScript(DataGridView dgv, List<string> Tables_name, List<string> strings, string columns2, int y, LibraryQuery lq, SqlConnection cnn)
         {
+            List<string> fkColumns = lq.GetForeignKeyColumns(dgv.Tag.ToString(), cnn);
             string qM = "";
             if (dgv.Tag.ToString() == Tables_name[2])
             {
@@ -53,13 +54,32 @@ namespace WA_Progetto
             string parameters2 = "";
             for (int k = 2; k < dgv.Rows[y].Cells.Count; k++)
             {
-                if (dgv.Rows[y].Cells[k].Value.ToString() != "")
+                if (fkColumns.Contains(dgv.Columns[k].HeaderText))
                 {
-                    parameters2 += ", '" + dgv.Rows[y].Cells[k].Value + "'";
+                    string refinfo = lq.GetReferencedTable(dgv.Tag.ToString(), dgv.Columns[k].HeaderText, cnn);
+                    string column1 = lq.GetAllColumnNames(refinfo, cnn)[0];
+                    string column2 = lq.GetAllColumnNames(refinfo, cnn)[1];
+                    string query = $"SELECT {column1} FROM {refinfo} WHERE {column2} = '{dgv.Rows[y].Cells[k].Value}'";
+                    DataSet ds = lq.ExecuteQ(query, cnn);
+                    if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0 && int.TryParse(ds.Tables[0].Rows[0][0].ToString(), out int idValue))
+                    {
+                        parameters2 += ", '" + idValue.ToString() + "'";
+                    }
+                    else
+                    {
+                        parameters2 += ", NULL";
+                    }
                 }
                 else
                 {
-                    parameters2 += ", NULL";
+                    if (dgv.Rows[y].Cells[k].Value.ToString() != "")
+                    {
+                        parameters2 += ", '" + dgv.Rows[y].Cells[k].Value + "'";
+                    }
+                    else
+                    {
+                        parameters2 += ", NULL";
+                    }
                 }
 
             }
@@ -69,7 +89,8 @@ namespace WA_Progetto
                     $"({columns2}) " +
                     $"VALUES ((SELECT ISNULL(MAX({strings[0]}), 0) + 1 FROM [dbo].[{dgv.Tag.ToString()}]), " +
                     $"@NewIdQueriesParameter{parameters2}); ";
-            }else if (dgv.Tag.ToString() == Tables_name[2])
+            }
+            else if (dgv.Tag.ToString() == Tables_name[2])
             {
                 qM += $"INSERT INTO [dbo].[{dgv.Tag.ToString()}] " +
                     $"({columns2}) " +
@@ -111,38 +132,25 @@ namespace WA_Progetto
             }
             return (resultString, resultBool);
         }
-        public (object, bool) ComboBoxScript(ComboBox cbx, LibraryQuery LQ, SqlConnection cnn, DataGridView dgv, List<string> s, int j, List<string> Tables_Name, DataTable dt=null)
+        public (object, bool) ComboBoxScript(ComboBox cbx, LibraryQuery LQ, SqlConnection cnn, DataGridView dgv, List<string> s, int j, List<string> Tables_Name, DataTable dt = null)
         {
             object resultString = DBNull.Value;
             bool resultBool = true;
             if (cbx.Text != "")
             {
-                if (cbx.Tag != null)
+                if (dgv.Tag.ToString() == "Queries" && cbx.Tag != null)
                 {
-                    if (!Tables_Name.Contains(cbx.Tag.ToString()))
+                    string column1 = LQ.GetAllColumnNames(cbx.Tag.ToString(), cnn)[0];
+                    string column2 = LQ.GetAllColumnNames(cbx.Tag.ToString(), cnn)[1];
+                    string query = $"SELECT {column1} FROM {cbx.Tag.ToString()} WHERE {column2} = '{cbx.Text}'";
+                    DataSet ds = LQ.ExecuteQ(query, cnn);
+                    if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0 && int.TryParse(ds.Tables[0].Rows[0][0].ToString(), out int idValue))
                     {
-                        string column1 = LQ.GetAllColumnNames(cbx.Tag.ToString(), cnn)[0];
-                        string column2 = LQ.GetAllColumnNames(cbx.Tag.ToString(), cnn)[1];
-                        string query = $"SELECT {column1} FROM {cbx.Tag.ToString()} WHERE {column2} = '{cbx.Text}'";
-                        DataSet ds = LQ.ExecuteQ(query, cnn);
-                        if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0 && int.TryParse(ds.Tables[0].Rows[0][0].ToString(), out int idValue))
-                        {
-                            resultString = idValue.ToString();
-                        }
-                        else
-                        {
-                            resultBool = false;
-                        }
+                        resultString = idValue.ToString();
                     }
                     else
                     {
-                        foreach (DataRow dr in dt.Rows) 
-                        {
-                            if (dr[2].ToString()==cbx.Text)
-                            {
-                                resultString = dr[0].ToString();
-                            }
-                        }
+                        resultBool = false;
                     }
                 }
                 else
