@@ -91,7 +91,7 @@ namespace WA_Progetto
             }
             Label lbl1 = new Label
             {
-                Text = "Edit Existing Row: Select a row in the DataGridView and double-click on it to open the form.\nAdd New Row: Select the empty row at the bottom of the DataGridView and double-click on it to open the form",
+                Text = "Edit Existing Row: Select a row in the DataGridView and double-click on it to open the form.\nAdd New Row: Double-click on the header of the DataGridView to open the form",
                 Location = new Point(430, 5),
                 AutoSize = true,
                 Anchor = AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Left,
@@ -107,6 +107,8 @@ namespace WA_Progetto
                 ReadOnly = true,
                 Height = frm_Querie.Height / 2 - 60,
                 Anchor = AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Left,
+                MultiSelect = false,
+                AllowUserToAddRows = false,
             };
             string q1 = BuildSelectWithJoins(dgv1.Tag.ToString(), cnn, LQ, 1, $"{Tables_name[0]}.ID_Queries = (SELECT ISNULL(MAX(Id_Queries), 0) + 1 FROM[dbo].[{Tables_name[0]}])");
             if (existing)
@@ -127,6 +129,8 @@ namespace WA_Progetto
                 ReadOnly = true,
                 Height = frm_Querie.Height / 2 - 60,
                 Anchor = AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Bottom,
+                MultiSelect = false,
+                AllowUserToAddRows = false,
             };
             string q2 = BuildSelectWithJoins(dgv2.Tag.ToString(), cnn, LQ, 1, $"{Tables_name[0]}.ID_Queries = (SELECT ISNULL(MAX(Id_Queries),0) +1 FROM [dbo].[{Tables_name[0]}])");
             if (existing)
@@ -146,6 +150,8 @@ namespace WA_Progetto
                 ReadOnly = true,
                 Height = frm_Querie.Height - 110,
                 Anchor = AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Bottom,
+                MultiSelect = false,
+                AllowUserToAddRows = false,
             };
             string q3 = BuildSelectWithJoins(dgv3.Tag.ToString(), cnn, LQ, 2, $"{Tables_name[2]}.ID_Queries_Parameter = (SELECT ISNULL(MAX(ID_Queries_Parameter),0) +1 FROM [dbo].[{Tables_name[2]}])");
             DataTable dt = new DataTable();
@@ -215,7 +221,7 @@ namespace WA_Progetto
                     string columns2 = string.Join(",\n\t\t\t", strings);
                     if (dgv.Tag.ToString() != Tables_name[3])
                     {
-                        for (int y = 0; y < dgv.Rows.Count - 1; y++)
+                        for (int y = 0; y < dgv.Rows.Count; y++)
                         {
                             queriesM.Add(LS.DataGridViewScript(dgv, Tables_name, strings, columns2, y, LQ, cnn));
                             if (dgv.Tag.ToString() == Tables_name[2])
@@ -223,7 +229,7 @@ namespace WA_Progetto
                                 DataGridView dgv1 = frm_Querie.Controls[i + 1] as DataGridView;
                                 DataTable dt1 = dgv1.DataSource as DataTable;
                                 dt1.DefaultView.RowFilter = $"{dgv1.Columns[1].HeaderText} = '{dgv.Rows[y].Cells[2].Value}'";
-                                for (int x = 0; x < dgv1.Rows.Count - 1; x++)
+                                for (int x = 0; x < dgv1.Rows.Count; x++)
                                 {
                                     queriesM.Add(LS.DataGridViewScript(dgv1, Tables_name, LQ.GetAllColumnNames(dgv1.Tag.ToString(), cnn), string.Join(", ", LQ.GetAllColumnNames(dgv1.Tag.ToString(), cnn)), x, LQ, cnn));
                                 }
@@ -277,42 +283,60 @@ namespace WA_Progetto
         private void ModuleCreation(object sender, EventArgs e, DataTable dt = null, DataGridView dv = null) //modulo per inserimento Queries_CrossModules e Queries_Parameters
         {
             DataGridView dgv = sender as DataGridView;
-            DataGridViewRow dgvr = dgv.Rows[0];
+            DataGridViewRow dgvr = null;
             bool existing = false;
-            if (dgv.SelectedRows.Count > 0)
+
+            // Controllo se la DataGridView ha almeno una riga
+            if (dgv.Rows.Count > 0)
             {
-                dgvr = dgv.SelectedRows[0];
-                if (!dgv.SelectedRows[0].IsNewRow)
+                dgvr = dgv.Rows[0];
+                if (dgv.SelectedRows.Count > 0)
                 {
-                    existing = true;
+                    dgvr = dgv.SelectedRows[0];
+                    if (!dgv.SelectedRows[0].IsNewRow)
+                    {
+                        existing = true;
+                    }
                 }
             }
-            if (dgv != null)
+            else
+            {
+                // Se la DataGridView è vuota, crea una DataGridViewRow fittizia per ottenere il numero di colonne
+                dgvr = dgv.Columns.Count > 0 ? dgv.RowTemplate : null;
+                existing = false;
+            }
+
+            if (dgvr != null)
             {
                 int n = 2;
                 if (dgv.Tag.ToString() == Tables_name[3])
                 {
                     n = 1;
                 }
+                int numControls = dgvr.Cells.Count > 0 ? dgvr.Cells.Count : dgv.Columns.Count;
                 Form frm_Module = new Form //Form
                 {
                     Text = $"Creazione nuovo record",
-                    Size = new Size(450, 100 + 30 * (dgvr.Cells.Count - n)),
+                    Size = new Size(450, 100 + 30 * (numControls - n)),
                     StartPosition = FormStartPosition.CenterParent
                 };
                 int y = 10;
                 List<string> fkColumns = LQ.GetForeignKeyColumns(dgv.Tag.ToString(), cnn);
 
-                for (int i = n; i < dgvr.Cells.Count; i++)
+                for (int i = n; i < numControls; i++)
                 {
+                    string headerText = dgv.Columns[i].HeaderText;
+                    object cellValue = existing ? dgvr.Cells[i].Value : null;
+                    Type valueType = dgv.Columns[i].ValueType ?? typeof(string);
+
                     Label lbl = new Label //Label
                     {
-                        Text = dgv.Columns[i].HeaderText,
+                        Text = headerText,
                         Location = new Point(10, y + 3),
                         AutoSize = true
                     };
                     frm_Module.Controls.Add(lbl);
-                    frm_Module.Controls.Add(CreateInputControl(dgvr.Cells[i].ValueType, fkColumns, dgv.Columns[i].HeaderText, dgv.Tag.ToString(), dgvr.Cells[i].Value, y, existing, dt));
+                    frm_Module.Controls.Add(CreateInputControl(valueType, fkColumns, headerText, dgv.Tag.ToString(), cellValue, y, existing, dt));
                     y = y + 30;
                 }
                 Button btn_ConfirmM = new Button //pulsante conferma
@@ -402,7 +426,6 @@ namespace WA_Progetto
                     a++;
                 }
                 dt.Rows.Add(rowt);
-                dgv.DataSource = dt;
                 frm.Close();
             }
             else
@@ -495,7 +518,7 @@ namespace WA_Progetto
         {
             DataGridView dgv2 = (DataGridView)sender;
             DataTable dt = dgv.DataSource as DataTable;
-            if (dgv2.SelectedRows.Count > 0 && dgv2.SelectedRows[0].Index < dgv2.Rows.Count - 1)
+            if (dgv2.SelectedRows.Count > 0 && !dgv2.SelectedRows[0].IsNewRow)
             {
                 dt.DefaultView.RowFilter = $"{dgv.Columns[1].HeaderText} = '{dgv2.SelectedRows[0].Cells[2].Value}'";
             }

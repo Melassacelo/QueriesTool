@@ -50,6 +50,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.dgv_Tabella.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgv_Tabella.Location = new System.Drawing.Point(14, 91);
+            this.dgv_Tabella.MultiSelect = false;
             this.dgv_Tabella.Name = "dgv_Tabella";
             this.dgv_Tabella.ReadOnly = true;
             this.dgv_Tabella.RowHeadersWidth = 62;
