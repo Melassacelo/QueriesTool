@@ -7,7 +7,7 @@ The main project files are `Form1.cs`, `LibraryQuery.cs`, and `LibraryScript.cs`
 * [General Info](#general-info)
 * [Main Components](#main-components)
 * [Requirements](#requirements)
-* [Screenshots](#screenshots)
+* [Guide](#guide)
 
 ---
 ## General Info
@@ -49,9 +49,71 @@ This project is a Windows Forms application developed in C# (.NET Framework 4.7.
 
 ---
 
-## Screenshots
-<img src="https://github.com/user-attachments/assets/d78d8d83-e34e-438a-a5c7-5b5ea7d7d747" height="225">
-<img src="https://github.com/user-attachments/assets/9b5a2a07-397d-4087-8a93-ee24a66cd460" height="225">
-<img src="https://github.com/user-attachments/assets/baeae23c-adf3-4d3b-a48e-b4fb8e44557f" height="225">
+## Guide
+### Overview
+
+When you start the program, the main table displays all records from the **"Queries"** table.  
+You can search for specific queries by entering a name or an ID in the search fields at the top and pressing the **Search** button.  
+The table will update to show only the records that match your criteria.
+
+### Searching and Filtering
+
+You can refine results using the search fields for query name or ID. Once you click the **Search** button, the results will filter accordingly.
+
+![Main Table](https://github.com/user-attachments/assets/3418f409-305f-464a-b0d5-a60f485bf44e)
+
+---
+
+### Creating and Duplicating Queries
+
+- Click **Create New** to add a new query.
+- A form will appear allowing entry for each field.
+- Fields referencing other tables are shown as dropdown menus.
+- On the right side of the form, manage related **Modules** and **Parameters**.
+
+To **duplicate** an existing query:
+
+1. Select a row from the main table.
+2. Click the **Duplicate** button.
+3. The form will pre-fill with the selected record's data.
+4. Modify as needed and save.
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/558fa1a1-5581-46a7-8055-5fcd758251d5" width="31%">
+  <img src="https://github.com/user-attachments/assets/21cbff67-88b4-4be3-b9e0-ae8891d0e29b" width="34%">
+  <img src="https://github.com/user-attachments/assets/99dde8f8-e128-4999-b7e3-5a7201362b8e" width="34%">
+</p>
+
+---
+
+### Managing Related Data
+
+Use the embedded grids in the form to edit:
+
+- `Queries_CrossModules`
+- `Queries_Parameter`
+- `Queries_Parameter_Detail`
+
+#### Actions:
+
+- **Edit:** Select and double-click a row.
+- **Add New:** Double-click an empty row or double-click with no selection.
+- **Delete:** Select a row and press the **Backspace** key.
+
+![Create or Duplicate Form](https://github.com/user-attachments/assets/207b44b1-3e74-42f9-a787-f2c9cdda34a7)
+
+---
+
+### Generating SQL Scripts
+
+When ready to save your changes:
+
+1. Click the **Generate .sql script** button.
+2. Choose the file name and location.
+3. A well-formatted SQL script will be created with your data.
+
+> ⚠️ If required fields are missing, the application will notify you.
+
+![Related Data Grids](https://github.com/user-attachments/assets/b1bcabd4-3f58-422a-8a59-f24842277e86)
 
 ---
