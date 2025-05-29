@@ -1,10 +1,11 @@
 # QueriesTool
 This Windows Forms application in C# (.NET Framework 4.7.2) allows you to manage SQL queries and their related parameters through a graphical interface.  
 The main project files are `Form1.cs`, `LibraryQuery.cs`, and `LibraryScript.cs`.
-[Download Here](https://downgit.github.io/#/home?url=https://github.com/Melassacelo/QueriesTool/blob/master/QueriesTool.zip)
+
 
 ## Table of Contents
 * [General Info](#general-info)
+* [Versions](#versions)
 * [Main Components](#main-components)
 * [Requirements](#requirements)
 * [Guide](#guide)
@@ -17,6 +18,11 @@ This project is a Windows Forms application developed in C# (.NET Framework 4.7.
 - Manage related records in the "Queries_CrossModules" and "Queries_Parameter" tables using embedded DataGridViews.
 - Automatically generate SQL script files based on the data entered, ensuring required fields are validated and foreign key relationships are respected.
 - Interact with the database schema dynamically, retrieving column names, required fields, and foreign key information at runtime.
+
+---
+
+## Versions
+- [v1.0.0](https://github.com/Melassacelo/QueriesTool/releases/tag/v1.0.0)
 
 ---
 ## Main Components
