@@ -97,7 +97,7 @@ Use the embedded grids in the form to edit:
 #### Actions:
 
 - **Edit:** Select and double-click a row.
-- **Add New:** Double-click an empty row or double-click with no selection.
+- **Add New:** Double-click on the Header of the DataGridView or double-click with no selection.
 - **Delete:** Select a row and press the **Backspace** key.
 
 ![Create or Duplicate Form](https://github.com/user-attachments/assets/207b44b1-3e74-42f9-a787-f2c9cdda34a7)
