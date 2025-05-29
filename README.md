@@ -79,9 +79,9 @@ To **duplicate** an existing query:
 4. Modify as needed and save.
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/558fa1a1-5581-46a7-8055-5fcd758251d5" width="31%">
-  <img src="https://github.com/user-attachments/assets/21cbff67-88b4-4be3-b9e0-ae8891d0e29b" width="34%">
-  <img src="https://github.com/user-attachments/assets/99dde8f8-e128-4999-b7e3-5a7201362b8e" width="34%">
+  <img src="https://github.com/user-attachments/assets/558fa1a1-5581-46a7-8055-5fcd758251d5" width="30.9%">
+  <img src="https://github.com/user-attachments/assets/21cbff67-88b4-4be3-b9e0-ae8891d0e29b" width="33.9%">
+  <img src="https://github.com/user-attachments/assets/99dde8f8-e128-4999-b7e3-5a7201362b8e" width="33.9%">
 </p>
 
 ---
