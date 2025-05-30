@@ -34,8 +34,8 @@ namespace WA_Progetto
                 $"FROM [dbo].[{Tables_name[0]}]) " +
                 $"INSERT INTO [dbo].{Tables_name[0]} " +
                 $"({columns}) " +
-                $"VALUES ({parameters}); " +
-                $"END " + queriesM1;
+                $"VALUES ({parameters}); " + queriesM1 +
+                $"END ";
             return query;
         }
         public string DataGridViewScript(DataGridView dgv, List<string> Tables_name, List<string> strings, string columns2, int y, LibraryQuery lq, SqlConnection cnn)
@@ -44,11 +44,7 @@ namespace WA_Progetto
             string qM = "";
             if (dgv.Tag.ToString() == Tables_name[2])
             {
-                qM = $"IF NOT EXISTS (SELECT 1 " +
-                    $"FROM [dbo].[{dgv.Tag.ToString()}] " +
-                    $"WHERE [Description]='{dgv.Rows[y].Cells[3].Value}') " +
-                    $"BEGIN " +
-                    $"SET @NewIdQueriesParameter = (SELECT ISNULL(MAX({strings[0]}), 0) + 1 " +
+                qM = $"SET @NewIdQueriesParameter = (SELECT ISNULL(MAX({strings[0]}), 0) + 1 " +
                     $"FROM [dbo].[{dgv.Tag.ToString()}]) ";
             }
             string parameters2 = "";
@@ -103,11 +99,6 @@ namespace WA_Progetto
                     $"({columns2}) " +
                     $"VALUES ((SELECT ISNULL(MAX({strings[0]}), 0) + 1 FROM [dbo].[{dgv.Tag.ToString()}]), " +
                     $"@NewIdQueries{parameters2}); ";
-            }
-
-            if (dgv.Tag.ToString() == Tables_name[2])
-            {
-                qM += $"END ";
             }
             return qM;
         }

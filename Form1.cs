@@ -30,18 +30,7 @@ namespace WA_Progetto
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if (!string.IsNullOrEmpty(txb_SearchId.Text) && !string.IsNullOrEmpty(txb_searchBar.Text))
-            {
-                dgv_Tabella.DataSource = LQ.ExecuteQ($"SELECT * FROM {Tables_name[0]} WHERE Name LIKE '%{txb_searchBar.Text}%' AND ID_Queries LIKE '%{txb_SearchId.Text}%'", cnn).Tables[0];
-            }
-            else if (!string.IsNullOrEmpty(txb_SearchId.Text))
-            {
-                dgv_Tabella.DataSource = LQ.ExecuteQWithParam($"SELECT * FROM {Tables_name[0]} WHERE ID_Queries LIKE '%' + @searchId + '%'", new SqlParameter("@searchId", txb_SearchId.Text), cnn).Tables[0];
-            }
-            else if (!string.IsNullOrEmpty(txb_searchBar.Text))
-            {
-                dgv_Tabella.DataSource = LQ.ExecuteQWithParam($"SELECT * FROM {Tables_name[0]} WHERE Name LIKE '%' + @searchText + '%'", new SqlParameter("@searchText", txb_searchBar.Text), cnn).Tables[0];
-            }
+            dgv_Tabella.DataSource = LQ.ExecuteQ($"SELECT * FROM {Tables_name[0]} WHERE Name LIKE '%{txb_searchBar.Text}%' AND ID_Queries LIKE '%{txb_SearchId.Text}%'", cnn).Tables[0];
         }
         private void dgv_Tabella_SelectionChanged(object sender, EventArgs e) //disattivazione e attivazione pulsante duplicazione
         {
