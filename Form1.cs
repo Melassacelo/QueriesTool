@@ -144,7 +144,7 @@ namespace WA_Progetto
             };
             string q3 = BuildSelectWithJoins(dgv3.Tag.ToString(), cnn, LQ, 2, $"{Tables_name[2]}.ID_Queries_Parameter = (SELECT ISNULL(MAX(ID_Queries_Parameter),0) +1 FROM [dbo].[{Tables_name[2]}])");
             DataTable dt = new DataTable();
-            if (existing)
+            if (existing && dtdgv2.Rows.Count>0)
             {
                 DataTable dt2 = dgv2.DataSource as DataTable;
                 foreach (DataRow drv in dt2.Rows)

@@ -18,6 +18,10 @@ namespace WA_Progetto
                 {
                     parameters += ", NULL";
                 }
+                else if(v == " ")
+                {
+                    parameters += ", ''";
+                }
                 else
                 {
                     parameters += ", '" + v + "'";
@@ -116,6 +120,9 @@ namespace WA_Progetto
                 {
                     resultBool = false;
                 }
+            }else if (dgv.Columns[j].HeaderText == "StoredProcedure")
+            {
+                resultString = " ";
             }
             else if (s.Contains(dgv.Columns[j].HeaderText))
             {
