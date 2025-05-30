@@ -56,6 +56,12 @@ This project is a Windows Forms application developed in C# (.NET Framework 4.7.
 ---
 
 ## Guide
+
+### Database Connection
+
+To change the database connection, open the WA_Progetto.exe.config file and locate the <connectionStrings> section. Update the connectionString attribute of the DefaultConnection entry with the new server name, database name, user, and password as needed. Save the file and restart the application for the changes to take effect.
+
+
 ### Overview
 
 When you start the program, the main table displays all records from the **"Queries"** table.  
