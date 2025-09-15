@@ -23,6 +23,7 @@ This project is a Windows Forms application developed in C# (.NET Framework 4.7.
 
 ## Versions
 - [v1.0.0](https://github.com/Melassacelo/QueriesTool/releases/download/v1.0.0/QueriesTool.zip)
+- [v1.0.1](https://github.com/Melassacelo/QueriesTool/releases/download/v1.0.1/QueriesTool.zip)
 
 ---
 ## Main Components
