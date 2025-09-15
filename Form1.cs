@@ -55,7 +55,7 @@ namespace WA_Progetto
             Form frm_Querie = new Form //Creazione Form
             {
                 Text = $"Creazione nuovo record",
-                Size = new Size(1150, 50 + 30 * row.Cells.Count),
+                Size = new Size(1110, 50 + 30 * row.Cells.Count),
                 StartPosition = FormStartPosition.CenterParent
             };
             int y = 10;
@@ -78,7 +78,7 @@ namespace WA_Progetto
 
                 y = y + 30;
             }
-            Label lbl1 = new Label
+            /*Label lbl1 = new Label
             {
                 Text = "Edit Existing Row: Select a row in the DataGridView and double-click on it to open the form.\nAdd New Row: Double-click on the header of the DataGridView to open the form",
                 Location = new Point(430, 5),
@@ -86,15 +86,15 @@ namespace WA_Progetto
                 Anchor = AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Left,
                 Font = new Font("Microsoft Sans Serif", 6.5F, FontStyle.Regular, GraphicsUnit.Point)
             };
-            frm_Querie.Controls.Add(lbl1);
+            frm_Querie.Controls.Add(lbl1);*/
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             DataGridView dgv1 = new DataGridView //Creazione datagridview per tabella Query_CrossModules
             {
                 Tag = "Queries_CrossModules",
-                Location = new Point(430, 30),
-                Width = 340,
+                Location = new Point(430, 10),
+                Width = 320,
                 ReadOnly = true,
-                Height = frm_Querie.Height / 2 - 60,
+                Height = frm_Querie.Height / 2 - 80,
                 Anchor = AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Left,
                 MultiSelect = false,
                 AllowUserToAddRows = false,
@@ -106,17 +106,40 @@ namespace WA_Progetto
             }
             DataTable dtdgv1 = LQ.ExecuteQ(q1, cnn).Tables[0];
             dgv1.DataSource = dtdgv1;
-            dgv1.DoubleClick += (s, ev) => ModuleCreation(s, ev);
-            dgv1.KeyDown += (s, ev) => RowElimination(s, ev, dgv1); //Creazione datagridview per tabella Query_parameters
+            //dgv1.DoubleClick += (s, ev) => ModuleCreation(s, ev);
+            //dgv1.KeyDown += (s, ev) => RowElimination(s, ev, dgv1); //Creazione datagridview per tabella Query_parameters
             frm_Querie.Controls.Add(dgv1);
+
+            Button btn_Add1 = new Button //pulsanti per record dgv
+            {
+                Text = "Add",
+                Location = new Point(430, dgv1.Bottom + 10),
+                Width = 160,
+                Anchor = AnchorStyles.Right | AnchorStyles.Bottom | AnchorStyles.Left,
+            };
+            btn_Add1.Click += (s, ev) => ModuleCreation(dgv1 as object, ev);
+            frm_Querie.Controls.Add(btn_Add1);
+
+            Button btn_Del1 = new Button //pulsanti per record dgv
+            {
+                Text = "Delete",
+                Location = new Point(590, dgv1.Bottom + 10),
+                Width = 160,
+                Anchor = AnchorStyles.Right | AnchorStyles.Bottom | AnchorStyles.Left,
+            };
+            btn_Del1.Click += (s, ev) => RowElimination(s, ev, dgv1);
+            frm_Querie.Controls.Add(btn_Del1);
+
+
+            dgv1.SelectionChanged += (s, ev) => SelectionChangedBtn(s, ev, btn_Add1, btn_Del1);
             //////////////////////////////////////////////////////////////////////////////////////
             DataGridView dgv2 = new DataGridView
             {
                 Tag = "Queries_Parameter",
-                Location = new Point(430, frm_Querie.Height / 2 - 20),
-                Width = 340,
+                Location = new Point(430, frm_Querie.Height / 2 - 30),
+                Width = 320,
                 ReadOnly = true,
-                Height = frm_Querie.Height / 2 - 60,
+                Height = frm_Querie.Height / 2 - 80,
                 Anchor = AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Bottom,
                 MultiSelect = false,
                 AllowUserToAddRows = false,
@@ -128,16 +151,35 @@ namespace WA_Progetto
             }
             DataTable dtdgv2 = LQ.ExecuteQ(q2, cnn).Tables[0];
             dgv2.DataSource = dtdgv2;
-            dgv2.KeyDown += (s, ev) => RowElimination(s, ev, dgv2);
+            //dgv2.KeyDown += (s, ev) => RowElimination(s, ev, dgv2);
             frm_Querie.Controls.Add(dgv2);
+
+            Button btn_Add2 = new Button //pulsanti per record dgv
+            {
+                Text = "Add",
+                Location = new Point(430, dgv2.Bottom + 10),
+                Width = 160,
+                Anchor = AnchorStyles.Right | AnchorStyles.Bottom | AnchorStyles.Left,
+            };
+            frm_Querie.Controls.Add(btn_Add2);
+
+            Button btn_Del2 = new Button //pulsanti per record dgv
+            {
+                Text = "Delete",
+                Location = new Point(590, dgv2.Bottom + 10),
+                Width = 160,
+                Anchor = AnchorStyles.Right | AnchorStyles.Bottom | AnchorStyles.Left,
+            };
+            btn_Del2.Click += (s, ev) => RowElimination(s, ev, dgv2);
+            frm_Querie.Controls.Add(btn_Del2);
             ////////////////////////////////////////////////////////////////////////////////////////////
             DataGridView dgv3 = new DataGridView
             {
                 Tag = "Queries_Parameter_Detail",
-                Location = new Point(780, 30),
-                Width = 340,
+                Location = new Point(760, 10),
+                Width = 320,
                 ReadOnly = true,
-                Height = frm_Querie.Height - 110,
+                Height = frm_Querie.Height - 120,
                 Anchor = AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Bottom,
                 MultiSelect = false,
                 AllowUserToAddRows = false,
@@ -159,16 +201,41 @@ namespace WA_Progetto
                 dt = LQ.ExecuteQ(q3, cnn).Tables[0];
             }
             dgv3.DataSource = dt;
-            dgv3.DoubleClick += (s, ev) => ModuleCreation(s, ev, dgv2.DataSource as DataTable);
-            dgv3.KeyDown += (s, ev) => RowElimination(s, ev, dgv3);
+            //dgv3.DoubleClick += (s, ev) => ModuleCreation(s, ev, dgv2.DataSource as DataTable);
+            //dgv3.KeyDown += (s, ev) => RowElimination(s, ev, dgv3);
             frm_Querie.Controls.Add(dgv3);
-            dgv2.SelectionChanged += (s, ev) => SelectionDetail(s, ev, dgv3);
-            dgv2.DoubleClick += (s, ev) => ModuleCreation(s, ev, null, dgv3);
+            dgv2.SelectionChanged += (s, ev) => SelectionDetail(s, ev, dgv3, btn_Add2, btn_Del2);
+            //dgv2.DoubleClick += (s, ev) => ModuleCreation(s, ev, null, dgv3);
+            btn_Add2.Click += (s, ev) => ModuleCreation(dgv2 as object, ev, null, dgv3);
+
+            Button btn_Add3 = new Button //pulsanti per record dgv
+            {
+                Text = "Add",
+                Location = new Point(760, dgv3.Bottom + 10),
+                Width = 160,
+                Anchor = AnchorStyles.Right | AnchorStyles.Bottom | AnchorStyles.Left,
+            };
+            btn_Add3.Click += (s, ev) => ModuleCreation(dgv3 as object, ev, dgv2.DataSource as DataTable);
+            frm_Querie.Controls.Add(btn_Add3);
+
+
+            Button btn_Del3 = new Button //pulsanti per record dgv
+            {
+                Text = "Delete",
+                Location = new Point(920, dgv3.Bottom + 10),
+                Width = 160,
+                Anchor = AnchorStyles.Right | AnchorStyles.Bottom | AnchorStyles.Left,
+            };
+            btn_Del3.Click += (s, ev) => RowElimination(s, ev, dgv3);
+            frm_Querie.Controls.Add(btn_Del3);
+
+            dgv3.SelectionChanged += (s, ev) => SelectionChangedBtn(s, ev, btn_Add3, btn_Del3);
+            /////////////////////////////////////////////////////////////////////////////////
             Button btn_Confirm = new Button //pulsante per la creazione del file.sql
             {
                 Text = "Generate .sql script",
                 Location = new Point(10, frm_Querie.Height - 75),
-                Width = 1110,
+                Width = 1070,
                 Anchor = AnchorStyles.Right | AnchorStyles.Bottom | AnchorStyles.Left,
             };
             btn_Confirm.Click += (s, ev) => btn_Confirm_onClick(s, ev, frm_Querie);
@@ -215,7 +282,7 @@ namespace WA_Progetto
                             queriesM.Add(LS.DataGridViewScript(dgv, Tables_name, strings, columns2, y, LQ, cnn));
                             if (dgv.Tag.ToString() == Tables_name[2])
                             {
-                                DataGridView dgv1 = frm_Querie.Controls[i + 1] as DataGridView;
+                                DataGridView dgv1 = frm_Querie.Controls[i + 3] as DataGridView;
                                 DataTable dt1 = dgv1.DataSource as DataTable;
                                 dt1.DefaultView.RowFilter = $"{dgv1.Columns[1].HeaderText} = '{dgv.Rows[y].Cells[2].Value}'";
                                 for (int x = 0; x < dgv1.Rows.Count; x++)
@@ -250,7 +317,6 @@ namespace WA_Progetto
                                 sw.WriteLine(formatted);
                             }
                             MessageBox.Show("SQL creata con successo");
-                            frm_Querie.Close();
                         }
                     }
                 }
@@ -258,8 +324,6 @@ namespace WA_Progetto
                 {
                     MessageBox.Show("Errore durante la creazione del file SQL: " + ex.Message);
                 }
-
-                frm_Querie.Close();
             }
             else //message di errore
             {
@@ -339,9 +403,9 @@ namespace WA_Progetto
                 frm_Module.ShowDialog();
             }
         }
-        private void RowElimination(object sender, KeyEventArgs e, DataGridView dgv) //Eliminazione Riga aggiunta
+        private void RowElimination(object sender, EventArgs e, DataGridView dgv) //Eliminazione Riga aggiunta
         {
-            if (dgv.SelectedRows.Count > 0 && e.KeyCode == Keys.Back)
+            if (dgv.SelectedRows.Count > 0)
             {
                 DataTable dt = dgv.DataSource as DataTable;
                 dt.Rows.RemoveAt(dgv.SelectedRows[0].Index);
@@ -503,7 +567,7 @@ namespace WA_Progetto
                 }
             }
         }
-        private void SelectionDetail(object sender, EventArgs e, DataGridView dgv)
+        private void SelectionDetail(object sender, EventArgs e, DataGridView dgv, Button btnA, Button btnD)
         {
             DataGridView dgv2 = (DataGridView)sender;
             DataTable dt = dgv.DataSource as DataTable;
@@ -515,6 +579,7 @@ namespace WA_Progetto
             {
                 dt.DefaultView.RowFilter = "";
             }
+            SelectionChangedBtn(sender, e, btnA, btnD);
         }
         private void FormLoad(object sender, EventArgs e)
         {
@@ -594,6 +659,21 @@ namespace WA_Progetto
                 q += $" WHERE {condizione}";
             }
             return q;
+        }
+
+        private void SelectionChangedBtn(object sender, EventArgs e, Button btnA, Button btnD)
+        {
+            DataGridView dgv2 = (DataGridView)sender;
+            if (dgv2.SelectedRows.Count > 0 && !dgv2.SelectedRows[0].IsNewRow)
+            {
+                btnA.Text = "Edit";
+                btnD.Enabled = true;
+            }
+            else
+            {
+                btnA.Text = "Add";
+                btnD.Enabled = false;
+            }
         }
 
     }
