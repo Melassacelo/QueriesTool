@@ -115,7 +115,7 @@ namespace WA_Progetto
                 Text = "Add",
                 Location = new Point(430, dgv1.Bottom + 10),
                 Width = 160,
-                Anchor = AnchorStyles.Right | AnchorStyles.Bottom | AnchorStyles.Left,
+                Anchor = AnchorStyles.Top | AnchorStyles.Left,
             };
             btn_Add1.Click += (s, ev) => ModuleCreation(dgv1 as object, ev);
             frm_Querie.Controls.Add(btn_Add1);
@@ -125,7 +125,7 @@ namespace WA_Progetto
                 Text = "Delete",
                 Location = new Point(590, dgv1.Bottom + 10),
                 Width = 160,
-                Anchor = AnchorStyles.Right | AnchorStyles.Bottom | AnchorStyles.Left,
+                Anchor = AnchorStyles.Right | AnchorStyles.Top,
             };
             btn_Del1.Click += (s, ev) => RowElimination(s, ev, dgv1);
             frm_Querie.Controls.Add(btn_Del1);
@@ -159,7 +159,7 @@ namespace WA_Progetto
                 Text = "Add",
                 Location = new Point(430, dgv2.Bottom + 10),
                 Width = 160,
-                Anchor = AnchorStyles.Right | AnchorStyles.Bottom | AnchorStyles.Left,
+                Anchor = AnchorStyles.Left | AnchorStyles.Bottom,
             };
             frm_Querie.Controls.Add(btn_Add2);
 
@@ -168,7 +168,7 @@ namespace WA_Progetto
                 Text = "Delete",
                 Location = new Point(590, dgv2.Bottom + 10),
                 Width = 160,
-                Anchor = AnchorStyles.Right | AnchorStyles.Bottom | AnchorStyles.Left,
+                Anchor = AnchorStyles.Right | AnchorStyles.Bottom,
             };
             btn_Del2.Click += (s, ev) => RowElimination(s, ev, dgv2);
             frm_Querie.Controls.Add(btn_Del2);
@@ -213,7 +213,7 @@ namespace WA_Progetto
                 Text = "Add",
                 Location = new Point(760, dgv3.Bottom + 10),
                 Width = 160,
-                Anchor = AnchorStyles.Right | AnchorStyles.Bottom | AnchorStyles.Left,
+                Anchor = AnchorStyles.Right | AnchorStyles.Bottom,
             };
             btn_Add3.Click += (s, ev) => ModuleCreation(dgv3 as object, ev, dgv2.DataSource as DataTable);
             frm_Querie.Controls.Add(btn_Add3);
@@ -224,7 +224,7 @@ namespace WA_Progetto
                 Text = "Delete",
                 Location = new Point(920, dgv3.Bottom + 10),
                 Width = 160,
-                Anchor = AnchorStyles.Right | AnchorStyles.Bottom | AnchorStyles.Left,
+                Anchor = AnchorStyles.Right | AnchorStyles.Bottom,
             };
             btn_Del3.Click += (s, ev) => RowElimination(s, ev, dgv3);
             frm_Querie.Controls.Add(btn_Del3);
